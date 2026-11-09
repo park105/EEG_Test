@@ -1,0 +1,25 @@
+{
+  "synthetic": true,
+  "seed": 42,
+  "fs": 128,
+  "channels": [
+    "F3",
+    "F4"
+  ],
+  "input_unit": "uV",
+  "erp": false,
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "permutations": 199,
+  "assume_exchangeable": false,
+  "inputs": {
+    "C:\\Users\\s101p\\OneDrive\\\ubb38\uc11c\\ChatGPT\\\uc0dd\uccb4\ub370\uc774\ud130 \ubd84\uc11d\uacfc \uc2e4\ubb34\\BrainFicial\\outputs\\null\\input\\eeg.csv": "cfd294880d7894893513a5ed1416d2442f9296c763476ed79dfc27a84dd8d958",
+    "C:\\Users\\s101p\\OneDrive\\\ubb38\uc11c\\ChatGPT\\\uc0dd\uccb4\ub370\uc774\ud130 \ubd84\uc11d\uacfc \uc2e4\ubb34\\BrainFicial\\outputs\\null\\input\\events.csv": "028bdbe1e213fb33cdb7af44bf7c76bb09ad766355b2084fdbeff8ed0b4ed17b"
+  },
+  "packages": {
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.9.1",
+    "matplotlib": "3.11.2"
+  }
+}

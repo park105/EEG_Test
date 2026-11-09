@@ -1,0 +1,56 @@
+{
+  "kind": "music",
+  "stimuli": [
+    {
+      "stimulus_id": "music_00",
+      "value": "assets/music_00.wav"
+    },
+    {
+      "stimulus_id": "music_01",
+      "value": "assets/music_01.wav"
+    },
+    {
+      "stimulus_id": "music_02",
+      "value": "assets/music_02.wav"
+    },
+    {
+      "stimulus_id": "music_03",
+      "value": "assets/music_03.wav"
+    },
+    {
+      "stimulus_id": "music_04",
+      "value": "assets/music_04.wav"
+    },
+    {
+      "stimulus_id": "music_05",
+      "value": "assets/music_05.wav"
+    },
+    {
+      "stimulus_id": "music_06",
+      "value": "assets/music_06.wav"
+    },
+    {
+      "stimulus_id": "music_07",
+      "value": "assets/music_07.wav"
+    },
+    {
+      "stimulus_id": "music_08",
+      "value": "assets/music_08.wav"
+    },
+    {
+      "stimulus_id": "music_09",
+      "value": "assets/music_09.wav"
+    },
+    {
+      "stimulus_id": "music_10",
+      "value": "assets/music_10.wav"
+    },
+    {
+      "stimulus_id": "music_11",
+      "value": "assets/music_11.wav"
+    }
+  ],
+  "baseline_s": 3,
+  "duration_s": 4,
+  "repeats": 2
+}

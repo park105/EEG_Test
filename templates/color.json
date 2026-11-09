@@ -1,0 +1,56 @@
+{
+  "kind": "color",
+  "stimuli": [
+    {
+      "stimulus_id": "color_00",
+      "value": "#cc4747"
+    },
+    {
+      "stimulus_id": "color_01",
+      "value": "#cc8947"
+    },
+    {
+      "stimulus_id": "color_02",
+      "value": "#cccc47"
+    },
+    {
+      "stimulus_id": "color_03",
+      "value": "#89cc47"
+    },
+    {
+      "stimulus_id": "color_04",
+      "value": "#47cc47"
+    },
+    {
+      "stimulus_id": "color_05",
+      "value": "#47cc89"
+    },
+    {
+      "stimulus_id": "color_06",
+      "value": "#47cccc"
+    },
+    {
+      "stimulus_id": "color_07",
+      "value": "#4789cc"
+    },
+    {
+      "stimulus_id": "color_08",
+      "value": "#4747cc"
+    },
+    {
+      "stimulus_id": "color_09",
+      "value": "#8947cc"
+    },
+    {
+      "stimulus_id": "color_10",
+      "value": "#cc47cc"
+    },
+    {
+      "stimulus_id": "color_11",
+      "value": "#cc4789"
+    }
+  ],
+  "baseline_s": 3,
+  "duration_s": 4,
+  "repeats": 2
+}

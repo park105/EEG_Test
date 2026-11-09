@@ -1,0 +1,56 @@
+{
+  "kind": "person",
+  "stimuli": [
+    {
+      "stimulus_id": "person_00",
+      "value": "assets/person_00.png"
+    },
+    {
+      "stimulus_id": "person_01",
+      "value": "assets/person_01.png"
+    },
+    {
+      "stimulus_id": "person_02",
+      "value": "assets/person_02.png"
+    },
+    {
+      "stimulus_id": "person_03",
+      "value": "assets/person_03.png"
+    },
+    {
+      "stimulus_id": "person_04",
+      "value": "assets/person_04.png"
+    },
+    {
+      "stimulus_id": "person_05",
+      "value": "assets/person_05.png"
+    },
+    {
+      "stimulus_id": "person_06",
+      "value": "assets/person_06.png"
+    },
+    {
+      "stimulus_id": "person_07",
+      "value": "assets/person_07.png"
+    },
+    {
+      "stimulus_id": "person_08",
+      "value": "assets/person_08.png"
+    },
+    {
+      "stimulus_id": "person_09",
+      "value": "assets/person_09.png"
+    },
+    {
+      "stimulus_id": "person_10",
+      "value": "assets/person_10.png"
+    },
+    {
+      "stimulus_id": "person_11",
+      "value": "assets/person_11.png"
+    }
+  ],
+  "baseline_s": 3,
+  "duration_s": 4,
+  "repeats": 2
+}

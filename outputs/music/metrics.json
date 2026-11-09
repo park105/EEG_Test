@@ -1,0 +1,85 @@
+{
+  "status": "ok",
+  "balanced_accuracy": 1.0,
+  "dummy_balanced_accuracy": 0.5,
+  "n_evaluated": 24,
+  "neutral_excluded": 0,
+  "feature_columns": [
+    "feature_F3_theta_db",
+    "feature_F4_theta_db",
+    "feature_F3_alpha_db",
+    "feature_F4_alpha_db",
+    "feature_F3_beta_db",
+    "feature_F4_beta_db",
+    "feature_F3_erp_300_500_uv",
+    "feature_F4_erp_300_500_uv"
+  ],
+  "folds": [
+    {
+      "fold": 0,
+      "train_stimuli": [
+        "music_00",
+        "music_01",
+        "music_02",
+        "music_03",
+        "music_04",
+        "music_07",
+        "music_08",
+        "music_09"
+      ],
+      "test_stimuli": [
+        "music_05",
+        "music_06",
+        "music_10",
+        "music_11"
+      ],
+      "balanced_accuracy": 1.0
+    },
+    {
+      "fold": 1,
+      "train_stimuli": [
+        "music_00",
+        "music_01",
+        "music_02",
+        "music_03",
+        "music_05",
+        "music_06",
+        "music_10",
+        "music_11"
+      ],
+      "test_stimuli": [
+        "music_04",
+        "music_07",
+        "music_08",
+        "music_09"
+      ],
+      "balanced_accuracy": 1.0
+    },
+    {
+      "fold": 2,
+      "train_stimuli": [
+        "music_04",
+        "music_05",
+        "music_06",
+        "music_07",
+        "music_08",
+        "music_09",
+        "music_10",
+        "music_11"
+      ],
+      "test_stimuli": [
+        "music_00",
+        "music_01",
+        "music_02",
+        "music_03"
+      ],
+      "balanced_accuracy": 1.0
+    }
+  ],
+  "interpretation": "Exploratory within-person/session held-out-stimulus association; no causal or mind-reading claim",
+  "permutation": {
+    "status": "not_run",
+    "reason": "Not requested"
+  },
+  "data_source": "SYNTHETIC / NOT EMPIRICAL"
+}

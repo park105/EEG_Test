@@ -1,0 +1,242 @@
+[
+  {
+    "seed": 0,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 0,
+    "null": true,
+    "status": "ok",
+    "score": 0.2916666666666667
+  },
+  {
+    "seed": 1,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 1,
+    "null": true,
+    "status": "ok",
+    "score": 0.375
+  },
+  {
+    "seed": 2,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 2,
+    "null": true,
+    "status": "ok",
+    "score": 0.5
+  },
+  {
+    "seed": 3,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 3,
+    "null": true,
+    "status": "ok",
+    "score": 0.4166666666666667
+  },
+  {
+    "seed": 4,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 4,
+    "null": true,
+    "status": "ok",
+    "score": 0.625
+  },
+  {
+    "seed": 5,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 5,
+    "null": true,
+    "status": "ok",
+    "score": 0.625
+  },
+  {
+    "seed": 6,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 6,
+    "null": true,
+    "status": "ok",
+    "score": 0.29166666666666663
+  },
+  {
+    "seed": 7,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 7,
+    "null": true,
+    "status": "ok",
+    "score": 0.25
+  },
+  {
+    "seed": 8,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 8,
+    "null": true,
+    "status": "ok",
+    "score": 0.5
+  },
+  {
+    "seed": 9,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 9,
+    "null": true,
+    "status": "ok",
+    "score": 0.7083333333333333
+  },
+  {
+    "seed": 10,
+    "null": false,
+    "status": "ok",
+    "score": 0.9583333333333333
+  },
+  {
+    "seed": 10,
+    "null": true,
+    "status": "ok",
+    "score": 0.33333333333333337
+  },
+  {
+    "seed": 11,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 11,
+    "null": true,
+    "status": "ok",
+    "score": 0.45833333333333337
+  },
+  {
+    "seed": 12,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 12,
+    "null": true,
+    "status": "ok",
+    "score": 0.5
+  },
+  {
+    "seed": 13,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 13,
+    "null": true,
+    "status": "ok",
+    "score": 0.5
+  },
+  {
+    "seed": 14,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 14,
+    "null": true,
+    "status": "ok",
+    "score": 0.5833333333333333
+  },
+  {
+    "seed": 15,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 15,
+    "null": true,
+    "status": "ok",
+    "score": 0.33333333333333337
+  },
+  {
+    "seed": 16,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 16,
+    "null": true,
+    "status": "ok",
+    "score": 0.20833333333333331
+  },
+  {
+    "seed": 17,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 17,
+    "null": true,
+    "status": "ok",
+    "score": 0.7083333333333333
+  },
+  {
+    "seed": 18,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 18,
+    "null": true,
+    "status": "ok",
+    "score": 0.5416666666666667
+  },
+  {
+    "seed": 19,
+    "null": false,
+    "status": "ok",
+    "score": 1.0
+  },
+  {
+    "seed": 19,
+    "null": true,
+    "status": "ok",
+    "score": 0.5833333333333334
+  }
+]
