@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BrainFicial · 시행별 EEG 예측</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f1f5f4;color:#183932;font:16px/1.55 "Malgun Gothic",sans-serif}main{max-width:980px;margin:auto;padding:48px 20px}h1{font-size:clamp(26px,4vw,40px);margin:0}p{margin:8px 0 22px}fieldset,article{background:#fff;border:1px solid #cadad4;border-radius:12px;padding:18px;margin:16px 0}fieldset{display:flex;gap:14px;flex-wrap:wrap}label{font-size:14px;font-weight:bold}select{display:block;max-width:100%;font:inherit;padding:8px;border:1px solid #80998e;border-radius:5px;background:white;color:inherit}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}th,td{text-align:right;border-bottom:1px solid #dce6e1;padding:12px 6px}th:first-child,td:first-child{text-align:left}caption{text-align:left;font-size:20px;font-weight:bold;padding:0 0 16px}small{display:block;font-weight:normal}.plot{width:33%}.track{position:relative;margin:0 9px;height:4px;background:#dce6e1}.dot,.diamond{position:absolute;top:50%;width:12px;height:12px;transform:translate(-50%,-50%);border-radius:50%;background:#165a49}.diamond{background:transparent;border:2px solid #8a490a;transform:translate(-50%,-50%) rotate(45deg);border-radius:0;width:18px;height:18px}.scroll{overflow:auto}td.missing{text-align:center;color:#50625b}footer{font-size:14px;color:#415d52}@media(max-width:600px){main{padding:20px 8px}article{padding:12px 6px}.plot{width:16%}th,td{font-size:13px;padding:10px 3px}}
+</style>
+<main><h1>시행별 EEG 예측</h1><p>참가자가 영상에 매긴 평점과 해당 시행을 보류하고 얻은 예측을 비교합니다.</p>
+<fieldset><legend>조회 조건</legend>
+<label>참가자<select id="person"></select></label><label>영상 ID<select id="video"></select></label>
+<label>평가 방식<select id="regime"><option value="within_person">개인 내 미관측 영상</option><option value="new_participant">미관측 참가자</option></select></label>
+<label>EEG 채널<select id="montage"><option value="4ch">4채널</option><option value="32ch">32채널</option></select></label>
+<label>모델<select id="model"><option>Ridge</option><option>SVR</option><option value="Median">중앙값 기준선</option></select></label>
+</fieldset><article><div class="scroll"><table><caption id="heading" aria-live="polite"></caption><thead><tr><th>라벨 · 척도</th><th class="plot">● 실제　◇ 예측</th><th>실제값</th><th>예측값</th><th>절대오차</th></tr></thead><tbody id="rows"></tbody></table></div></article>
+<footer>Familiarity는 1–5점, 다른 평정은 1–9점입니다. 척도를 벗어난 예측이 있으면 해당 행의 축을 확장합니다. 중앙값 기준선은 학습 평점만 사용합니다.</footer></main>
+<script>
+const trials=/*PREDICTIONS*/;
+const get=id=>document.getElementById(id);
+const labels=["Valence","Arousal","Dominance","Liking","Familiarity"];
+for(let i=1;i<=32;i++) get("person").add(new Option("s"+String(i).padStart(2,"0"),i));
+for(let i=1;i<=40;i++) get("video").add(new Option(String(i),i));
+function render(){
+  const key=["person","video","regime","montage","model"].map(id=>get(id).value).join("/");
+  const values=trials[key];
+  get("heading").textContent=get("person").selectedOptions[0].text+" · 영상 "+get("video").value;
+  get("rows").innerHTML=labels.map((label,i)=>{
+    const max=i===4?5:9;
+    const pair=values[i];
+    const name="<th scope='row'>"+label+"<small>1–"+max+"점</small></th>";
+    if(!pair) return "<tr>"+name+"<td class='missing' colspan='4'>평정 결측 · 평가 제외</td></tr>";
+    const [actual,pred]=pair;
+    const lo=Math.min(1,pred), hi=Math.max(max,pred);
+    const pos=v=>100*(v-lo)/(hi-lo);
+    const plot="<td><div class='track' aria-hidden='true'><span class='dot' style='left:"+pos(actual)+"%'></span><span class='diamond' style='left:"+pos(pred)+"%'></span></div></td>";
+    return "<tr>"+name+plot+[actual,pred,Math.abs(pred-actual)].map(v=>"<td>"+v.toFixed(3)+"</td>").join("")+"</tr>";
+  }).join("");
+}
+document.querySelector("fieldset").addEventListener("change",render);
+render();
+</script></html>
