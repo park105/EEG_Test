@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+# 참가자 EEG·설문 원자료는 저장소에 올리지 않는다
+data/
+# 내려받은 후보 사진(최종 세트는 stimuli/images)
+stimuli/candidates/

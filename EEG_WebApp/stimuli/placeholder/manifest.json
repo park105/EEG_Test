@@ -1,0 +1,101 @@
+{
+  "note": "자리표시 자극입니다. 실제 이미지로 바꾸고 category/tone을 설문 문항과 맞추세요. type: video는 확장 예정(README 참고).",
+  "stimuli": [
+    {
+      "id": "nature_01",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/nature_01.svg",
+      "title": "자연 1",
+      "category": "nature",
+      "tone": "warm"
+    },
+    {
+      "id": "nature_02",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/nature_02.svg",
+      "title": "자연 2",
+      "category": "nature",
+      "tone": "cool"
+    },
+    {
+      "id": "nature_03",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/nature_03.svg",
+      "title": "자연 3",
+      "category": "nature",
+      "tone": "warm"
+    },
+    {
+      "id": "city_01",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/city_01.svg",
+      "title": "도시 1",
+      "category": "city",
+      "tone": "cool"
+    },
+    {
+      "id": "city_02",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/city_02.svg",
+      "title": "도시 2",
+      "category": "city",
+      "tone": "warm"
+    },
+    {
+      "id": "city_03",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/city_03.svg",
+      "title": "도시 3",
+      "category": "city",
+      "tone": "warm"
+    },
+    {
+      "id": "animal_01",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/animal_01.svg",
+      "title": "동물 1",
+      "category": "animal",
+      "tone": "warm"
+    },
+    {
+      "id": "animal_02",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/animal_02.svg",
+      "title": "동물 2",
+      "category": "animal",
+      "tone": "cool"
+    },
+    {
+      "id": "animal_03",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/animal_03.svg",
+      "title": "동물 3",
+      "category": "animal",
+      "tone": "warm"
+    },
+    {
+      "id": "food_01",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/food_01.svg",
+      "title": "음식 1",
+      "category": "food",
+      "tone": "cool"
+    },
+    {
+      "id": "food_02",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/food_02.svg",
+      "title": "음식 2",
+      "category": "food",
+      "tone": "warm"
+    },
+    {
+      "id": "food_03",
+      "type": "image",
+      "src": "/stimuli/placeholder/images/food_03.svg",
+      "title": "음식 3",
+      "category": "food",
+      "tone": "warm"
+    }
+  ]
+}

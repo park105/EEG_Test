@@ -1,0 +1,517 @@
+{
+  "note": "위키미디어 공용의 자유 라이선스 사진(예시). 1024×768, 휘도 평균·대비 통일. tone은 평균 R−B로 자동 분류. 출처는 CREDITS.md.",
+  "stimuli": [
+    {
+      "id": "nature_01",
+      "type": "image",
+      "src": "/stimuli/images/nature_01.jpg",
+      "title": "자연 1",
+      "category": "nature",
+      "tone": "cool",
+      "tone_score": -0.5,
+      "credit": {
+        "title": "File:Ergaki, Mountain lake Skazka, Rock formations, Sayan Mountains, Russia.jpg",
+        "artist": "Vyacheslav Argenberg",
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Ergaki,_Mountain_lake_Skazka,_Rock_formations,_Sayan_Mountains,_Russia.jpg"
+      }
+    },
+    {
+      "id": "nature_02",
+      "type": "image",
+      "src": "/stimuli/images/nature_02.jpg",
+      "title": "자연 2",
+      "category": "nature",
+      "tone": "cool",
+      "tone_score": -19.0,
+      "credit": {
+        "title": "File:1 lake louise pano 2019.jpg",
+        "artist": "Chensiyuan",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:1_lake_louise_pano_2019.jpg"
+      }
+    },
+    {
+      "id": "nature_03",
+      "type": "image",
+      "src": "/stimuli/images/nature_03.jpg",
+      "title": "자연 3",
+      "category": "nature",
+      "tone": "warm",
+      "tone_score": 34.6,
+      "credit": {
+        "title": "File:Bamberg Bruderwald Herbst-20151102-RM-110637.jpg",
+        "artist": "Ermell",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Bamberg_Bruderwald_Herbst-20151102-RM-110637.jpg"
+      }
+    },
+    {
+      "id": "nature_04",
+      "type": "image",
+      "src": "/stimuli/images/nature_04.jpg",
+      "title": "자연 4",
+      "category": "nature",
+      "tone": "warm",
+      "tone_score": 7.5,
+      "credit": {
+        "title": "File:Dülmen, Kirchspiel, Börnste, Neusträßer Bruch, Waldweg -- 2024 -- 6526.jpg",
+        "artist": "Dietmar Rabich",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:D%C3%BClmen,_Kirchspiel,_B%C3%B6rnste,_Neustr%C3%A4%C3%9Fer_Bruch,_Waldweg_--_2024_--_6526.jpg"
+      }
+    },
+    {
+      "id": "nature_05",
+      "type": "image",
+      "src": "/stimuli/images/nature_05.jpg",
+      "title": "자연 5",
+      "category": "nature",
+      "tone": "cool",
+      "tone_score": -23.4,
+      "credit": {
+        "title": "File:Baltic Sea view from Schmiedeberg hill in Rerik, 2025-06-23.jpg",
+        "artist": "Radomianin",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Baltic_Sea_view_from_Schmiedeberg_hill_in_Rerik,_2025-06-23.jpg"
+      }
+    },
+    {
+      "id": "nature_06",
+      "type": "image",
+      "src": "/stimuli/images/nature_06.jpg",
+      "title": "자연 6",
+      "category": "nature",
+      "tone": "cool",
+      "tone_score": -9.9,
+      "credit": {
+        "title": "File:Bhorley waterfall of Dolakha and Tamakoshi river as seen from above.jpg",
+        "artist": "Nammy Hang Kirat",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Bhorley_waterfall_of_Dolakha_and_Tamakoshi_river_as_seen_from_above.jpg"
+      }
+    },
+    {
+      "id": "nature_07",
+      "type": "image",
+      "src": "/stimuli/images/nature_07.jpg",
+      "title": "자연 7",
+      "category": "nature",
+      "tone": "warm",
+      "tone_score": 23.7,
+      "credit": {
+        "title": "File:Waterfall in Russian Gulch State Park.jpg",
+        "artist": "Frank Schulenburg",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Waterfall_in_Russian_Gulch_State_Park.jpg"
+      }
+    },
+    {
+      "id": "nature_08",
+      "type": "image",
+      "src": "/stimuli/images/nature_08.jpg",
+      "title": "자연 8",
+      "category": "nature",
+      "tone": "warm",
+      "tone_score": 31.4,
+      "credit": {
+        "title": "File:Blumenwiese am Stadtrand von Koenigs Wusterhausen.jpg",
+        "artist": "V.Boldychev",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Blumenwiese_am_Stadtrand_von_Koenigs_Wusterhausen.jpg"
+      }
+    },
+    {
+      "id": "city_01",
+      "type": "image",
+      "src": "/stimuli/images/city_01.jpg",
+      "title": "도시 1",
+      "category": "city",
+      "tone": "warm",
+      "tone_score": 31.3,
+      "credit": {
+        "title": "File:Skyline Frankfurt am Main.jpg",
+        "artist": "Nicolas Scheuer",
+        "license": "CC BY-SA 2.5",
+        "license_url": "https://creativecommons.org/licenses/by-sa/2.5",
+        "source": "https://commons.wikimedia.org/wiki/File:Skyline_Frankfurt_am_Main.jpg"
+      }
+    },
+    {
+      "id": "city_02",
+      "type": "image",
+      "src": "/stimuli/images/city_02.jpg",
+      "title": "도시 2",
+      "category": "city",
+      "tone": "cool",
+      "tone_score": -4.6,
+      "credit": {
+        "title": "File:Frankfurter Altstadt mit Skyline 2012-04.jpg",
+        "artist": "Thomas Wolf, www.foto-tw.de",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Frankfurter_Altstadt_mit_Skyline_2012-04.jpg"
+      }
+    },
+    {
+      "id": "city_03",
+      "type": "image",
+      "src": "/stimuli/images/city_03.jpg",
+      "title": "도시 3",
+      "category": "city",
+      "tone": "cool",
+      "tone_score": -2.9,
+      "credit": {
+        "title": "File:Québec city at night, view from Lévis city.jpg",
+        "artist": "Wilfredor",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Qu%C3%A9bec_city_at_night,_view_from_L%C3%A9vis_city.jpg"
+      }
+    },
+    {
+      "id": "city_04",
+      "type": "image",
+      "src": "/stimuli/images/city_04.jpg",
+      "title": "도시 4",
+      "category": "city",
+      "tone": "warm",
+      "tone_score": 47.9,
+      "credit": {
+        "title": "File:Széchenyi Chain Bridge in Budapest at night.jpg",
+        "artist": "Wilfredor",
+        "license": "CC0",
+        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "source": "https://commons.wikimedia.org/wiki/File:Sz%C3%A9chenyi_Chain_Bridge_in_Budapest_at_night.jpg"
+      }
+    },
+    {
+      "id": "city_05",
+      "type": "image",
+      "src": "/stimuli/images/city_05.jpg",
+      "title": "도시 5",
+      "category": "city",
+      "tone": "cool",
+      "tone_score": -14.3,
+      "credit": {
+        "title": "File:Prague, Old Town Square, COVID.jpg",
+        "artist": "Tadeáš Gregor",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Prague,_Old_Town_Square,_COVID.jpg"
+      }
+    },
+    {
+      "id": "city_06",
+      "type": "image",
+      "src": "/stimuli/images/city_06.jpg",
+      "title": "도시 6",
+      "category": "city",
+      "tone": "cool",
+      "tone_score": -27.8,
+      "credit": {
+        "title": "File:Skyscraper Los Angeles Downtown 2013.jpg",
+        "artist": "Tuxyso",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Skyscraper_Los_Angeles_Downtown_2013.jpg"
+      }
+    },
+    {
+      "id": "city_07",
+      "type": "image",
+      "src": "/stimuli/images/city_07.jpg",
+      "title": "도시 7",
+      "category": "city",
+      "tone": "cool",
+      "tone_score": -4.9,
+      "credit": {
+        "title": "File:Skyscrapers in Warsaw's downtown district, 2026, Poland.jpg",
+        "artist": "Igor123121",
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Skyscrapers_in_Warsaw%27s_downtown_district,_2026,_Poland.jpg"
+      }
+    },
+    {
+      "id": "city_08",
+      "type": "image",
+      "src": "/stimuli/images/city_08.jpg",
+      "title": "도시 8",
+      "category": "city",
+      "tone": "warm",
+      "tone_score": 8.3,
+      "credit": {
+        "title": "File:Sydney (AU), Darling Harbour -- 2019 -- 3193-5.jpg",
+        "artist": "Dietmar Rabich",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Sydney_(AU),_Darling_Harbour_--_2019_--_3193-5.jpg"
+      }
+    },
+    {
+      "id": "animal_01",
+      "type": "image",
+      "src": "/stimuli/images/animal_01.jpg",
+      "title": "동물 1",
+      "category": "animal",
+      "tone": "cool",
+      "tone_score": -6.3,
+      "credit": {
+        "title": "File:Felis catus-cat on snow.jpg",
+        "artist": "Von.grzanka",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Felis_catus-cat_on_snow.jpg"
+      }
+    },
+    {
+      "id": "animal_02",
+      "type": "image",
+      "src": "/stimuli/images/animal_02.jpg",
+      "title": "동물 2",
+      "category": "animal",
+      "tone": "warm",
+      "tone_score": 8.8,
+      "credit": {
+        "title": "File:Cat Sphynx. Kittens. img 11.jpg",
+        "artist": "Dmitry Makeev",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Cat_Sphynx._Kittens._img_11.jpg"
+      }
+    },
+    {
+      "id": "animal_03",
+      "type": "image",
+      "src": "/stimuli/images/animal_03.jpg",
+      "title": "동물 3",
+      "category": "animal",
+      "tone": "warm",
+      "tone_score": 21.0,
+      "credit": {
+        "title": "File:Portrait of a labrador retriever.jpg",
+        "artist": "Dktue",
+        "license": "CC0",
+        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "source": "https://commons.wikimedia.org/wiki/File:Portrait_of_a_labrador_retriever.jpg"
+      }
+    },
+    {
+      "id": "animal_04",
+      "type": "image",
+      "src": "/stimuli/images/animal_04.jpg",
+      "title": "동물 4",
+      "category": "animal",
+      "tone": "warm",
+      "tone_score": 37.4,
+      "credit": {
+        "title": "File:West Highland White Terrier face portrait May 2023.jpg",
+        "artist": "Dominic Nelson",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:West_Highland_White_Terrier_face_portrait_May_2023.jpg"
+      }
+    },
+    {
+      "id": "animal_05",
+      "type": "image",
+      "src": "/stimuli/images/animal_05.jpg",
+      "title": "동물 5",
+      "category": "animal",
+      "tone": "warm",
+      "tone_score": 37.0,
+      "credit": {
+        "title": "File:Red fox (Vulpes vulpes crucigera) Skalnate Pleso 2.jpg",
+        "artist": "Charles J. Sharp",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Red_fox_(Vulpes_vulpes_crucigera)_Skalnate_Pleso_2.jpg"
+      }
+    },
+    {
+      "id": "animal_06",
+      "type": "image",
+      "src": "/stimuli/images/animal_06.jpg",
+      "title": "동물 6",
+      "category": "animal",
+      "tone": "warm",
+      "tone_score": 58.7,
+      "credit": {
+        "title": "File:014 Wild Red Deer Switzerland Photo by Giles Laurent.jpg",
+        "artist": "Giles Laurent",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:014_Wild_Red_Deer_Switzerland_Photo_by_Giles_Laurent.jpg"
+      }
+    },
+    {
+      "id": "animal_07",
+      "type": "image",
+      "src": "/stimuli/images/animal_07.jpg",
+      "title": "동물 7",
+      "category": "animal",
+      "tone": "warm",
+      "tone_score": 29.3,
+      "credit": {
+        "title": "File:Chital in Sundarbans National Park July 2025 by Tisha Mukherjee 02.jpg",
+        "artist": "Tisha Mukherjee",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Chital_in_Sundarbans_National_Park_July_2025_by_Tisha_Mukherjee_02.jpg"
+      }
+    },
+    {
+      "id": "animal_08",
+      "type": "image",
+      "src": "/stimuli/images/animal_08.jpg",
+      "title": "동물 8",
+      "category": "animal",
+      "tone": "warm",
+      "tone_score": 28.4,
+      "credit": {
+        "title": "File:Eurasian eagle-owl (44088).jpg",
+        "artist": "Rhododendrites",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Eurasian_eagle-owl_(44088).jpg"
+      }
+    },
+    {
+      "id": "food_01",
+      "type": "image",
+      "src": "/stimuli/images/food_01.jpg",
+      "title": "음식 1",
+      "category": "food",
+      "tone": "warm",
+      "tone_score": 12.6,
+      "credit": {
+        "title": "File:Lunch dish (pumpkin sauce, potatoes and chicken steak).jpg",
+        "artist": "Petar Milošević",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Lunch_dish_(pumpkin_sauce,_potatoes_and_chicken_steak).jpg"
+      }
+    },
+    {
+      "id": "food_02",
+      "type": "image",
+      "src": "/stimuli/images/food_02.jpg",
+      "title": "음식 2",
+      "category": "food",
+      "tone": "warm",
+      "tone_score": 12.8,
+      "credit": {
+        "title": "File:Christmas table (Serbian cuisine).jpg",
+        "artist": "Petar Milošević",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Christmas_table_(Serbian_cuisine).jpg"
+      }
+    },
+    {
+      "id": "food_03",
+      "type": "image",
+      "src": "/stimuli/images/food_03.jpg",
+      "title": "음식 3",
+      "category": "food",
+      "tone": "warm",
+      "tone_score": 81.1,
+      "credit": {
+        "title": "File:Gâteau sur un plateau au Bénin 01.jpg",
+        "artist": "Adoscam",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:G%C3%A2teau_sur_un_plateau_au_B%C3%A9nin_01.jpg"
+      }
+    },
+    {
+      "id": "food_04",
+      "type": "image",
+      "src": "/stimuli/images/food_04.jpg",
+      "title": "음식 4",
+      "category": "food",
+      "tone": "warm",
+      "tone_score": 48.3,
+      "credit": {
+        "title": "File:Mandarin Oranges (Citrus Reticulata).jpg",
+        "artist": "Joe Ravi",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Mandarin_Oranges_(Citrus_Reticulata).jpg"
+      }
+    },
+    {
+      "id": "food_05",
+      "type": "image",
+      "src": "/stimuli/images/food_05.jpg",
+      "title": "음식 5",
+      "category": "food",
+      "tone": "warm",
+      "tone_score": 69.8,
+      "credit": {
+        "title": "File:Sliced Wheat Bread National Bakery Ooty Aug25 A7CR 07148.jpg",
+        "artist": "Timothy A. Gonsalves",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Sliced_Wheat_Bread_National_Bakery_Ooty_Aug25_A7CR_07148.jpg"
+      }
+    },
+    {
+      "id": "food_06",
+      "type": "image",
+      "src": "/stimuli/images/food_06.jpg",
+      "title": "음식 6",
+      "category": "food",
+      "tone": "cool",
+      "tone_score": -14.4,
+      "credit": {
+        "title": "File:Brown bread made with dinkel wheat and millet 02.jpg",
+        "artist": "Kritzolina",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Brown_bread_made_with_dinkel_wheat_and_millet_02.jpg"
+      }
+    },
+    {
+      "id": "food_07",
+      "type": "image",
+      "src": "/stimuli/images/food_07.jpg",
+      "title": "음식 7",
+      "category": "food",
+      "tone": "cool",
+      "tone_score": -15.4,
+      "credit": {
+        "title": "File:Dish of blueberries.jpg",
+        "artist": "Petar Milošević",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Dish_of_blueberries.jpg"
+      }
+    },
+    {
+      "id": "food_08",
+      "type": "image",
+      "src": "/stimuli/images/food_08.jpg",
+      "title": "음식 8",
+      "category": "food",
+      "tone": "warm",
+      "tone_score": 60.7,
+      "credit": {
+        "title": "File:Capsicum baccatum in Saúde flea market, São Paulo, Brazil.jpg",
+        "artist": "Wilfredor",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "https://commons.wikimedia.org/wiki/File:Capsicum_baccatum_in_Sa%C3%BAde_flea_market,_S%C3%A3o_Paulo,_Brazil.jpg"
+      }
+    }
+  ]
+}
