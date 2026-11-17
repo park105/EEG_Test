@@ -219,6 +219,7 @@ def device_status():
 class NewSession(BaseModel):
     participant_id: str = Field(min_length=1, max_length=64)
     paper_mode: bool = False
+    blind_rating: bool = False
 
 
 @app.post("/api/sessions")
@@ -234,7 +235,8 @@ def create_session(body: NewSession):
                               "stimulus_s": t.stimulus_s, "recovery_s": t.recovery_s},
                              settings.order_seed)
     state.session = session
-    session.meta["paper_mode"] = body.paper_mode
+    session.meta["paper_mode"] = body.paper_mode or body.blind_rating
+    session.meta["blind_rating"] = body.blind_rating
     session.save_meta()
     by_id = {s["id"]: s for s in STIMULI}
     return {"session_id": session.id,
@@ -318,6 +320,8 @@ class Rating(BaseModel):
 
 @app.post("/api/sessions/{session_id}/ratings")
 def post_rating(session_id: str, r: Rating):
+    if require_session(session_id).meta.get("blind_rating"):
+        raise HTTPException(409, "독립 평가 세션은 현장 응답을 별도 파일에 저장합니다.")
     # 평정은 장비가 끊긴 순간에도 잃지 않는다(시각만 비워 둔다)
     ts = state.acquisition.source.now() if state.acquisition else float("nan")
     require_session(session_id).add_rating(r.trial_index, r.stimulus_id, r.liking, r.seen_before, ts)
@@ -331,7 +335,12 @@ def save_capture(session_id: str, idx: int, body: field_analysis.TrialCapture):
     order = s.meta["order"]
     if not 0 <= idx < len(order) or order[idx] != body.stimulus_id or not s.recording:
         raise HTTPException(409, "기록 중인 세션의 사진 ID와 시행 번호를 확인하세요.")
-    field_analysis.write_json(s.dir / f"capture_{idx}.json", body.model_dump())
+    if s.meta.get("blind_rating"):
+        if body.live_liking is None:
+            raise HTTPException(422, "현장 Liking 점수가 필요합니다.")
+        field_analysis.write_json(s.dir / f"response_{idx}.json",
+                                  {"stimulus_id": body.stimulus_id, "liking": body.live_liking})
+    field_analysis.write_json(s.dir / f"capture_{idx}.json", body.model_dump(exclude={"live_liking"}))
     return {"saved": len(body.samples)}
 
 
@@ -341,7 +350,7 @@ def read_paper(session_id: str):
     directory = settings.data_dir / session_id
     papers = {level: json.loads(path.read_text(encoding="utf8")) for level in ("photo","category")
               if (path := directory / f"paper_{level}.json").exists()}
-    return {"result": result, "papers": papers}
+    return {"result": result, "papers": papers, "live": field_analysis.live_evaluation(directory, result)}
 
 
 @app.get("/api/field/sessions")

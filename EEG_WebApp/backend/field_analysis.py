@@ -28,6 +28,18 @@ class TrialCapture(BaseModel):
     stimulus_id: str
     camera_enabled: bool
     samples: list[CameraSample] = Field(default_factory=list, max_length=1000)
+    live_liking: int | None = Field(default=None, strict=True, ge=1, le=9)
+
+
+def live_evaluation(directory, result):
+    scores = {}
+    for item in result["items"]:
+        path = directory / f"response_{item['trial_index']}.json"
+        if path.exists():
+            response = json.loads(path.read_text(encoding="utf8"))
+            if response["stimulus_id"] == item["stimulus_id"]:
+                scores[item["stimulus_id"]] = response["liking"]
+    return evaluate(result, PaperScores(level="photo", scale=9, scores=scores)) if scores else None
 
 
 def gamma_db(signal, fs):

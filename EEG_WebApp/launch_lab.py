@@ -20,7 +20,11 @@ class LabServer(uvicorn.Server):
 if __name__ == "__main__":
     try:
         with urlopen("http://127.0.0.1:8766/openapi.json", timeout=1) as response:
-            if "/api/field/sessions" in json.load(response).get("paths", {}):
+            schema = json.load(response)
+            fields = schema.get("components", {}).get("schemas", {}).get("NewSession", {}).get("properties", {})
+            if "/api/field/sessions" in schema.get("paths", {}) and "blind_rating" not in fields:
+                raise SystemExit("먼저 기존 실측 서버 창을 닫고 start_lab.cmd를 다시 실행하세요.")
+            if "/api/field/sessions" in schema.get("paths", {}):
                 webbrowser.open("http://127.0.0.1:8766/static/wiring.html")
                 raise SystemExit(0)
     except (URLError, OSError, ValueError):

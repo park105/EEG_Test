@@ -30,6 +30,16 @@ async function init(){
   el("sessions").onchange=()=>location.assign("?session="+encodeURIComponent(el("sessions").value));
   if(!id){el("status").textContent=ids.length?"완료한 세션을 선택하세요.":"아직 완료한 측정이 없습니다.";return;}
   const data=await request(endpoint());result=data.result;papers=data.papers;el("sessions").value=id;
+  if(data.live){
+    const live=data.live;
+    el("live-results").hidden=false;
+    el("live-summary").textContent=`현장 응답 ${live.rows.length}개 · EEG와 비교 가능한 사진 ${live.n}개 · MAE ${fmt(live.mae)}점 · RMSE ${fmt(live.rmse)}점`;
+    for(const r of live.rows){
+      const row=node("tr","");
+      row.append(...[r.key,String(r.paper),fmt(r.prediction)].map(value=>node("td",value)));
+      el("live-rows").append(row);
+    }
+  }
   el("status").textContent=(result.synthetic?"모의 EEG · ":"")+"참가자 "+result.participant_id+" · "+id;
   el("analysis").hidden=el("survey").hidden=false;
   result.items.sort((a,b)=>a.trial_index-b.trial_index);

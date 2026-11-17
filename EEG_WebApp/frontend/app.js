@@ -57,7 +57,7 @@ const store = {
   save() {
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify({ session: S.session, participant: S.participant,
-        trials: S.trials.map(({ preload, ...t }) => t), quick: QUICK, paperMode:S.paperMode }));
+        trials: S.trials.map(({ preload, ...t }) => t), quick: QUICK, paperMode:S.paperMode, blindRating:S.blindRating }));
     } catch (e) { /* 저장 불가 환경: 이어하기만 안 됨 */ }
   },
   load() { try { return JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { return null; } },
@@ -88,7 +88,7 @@ function timing() {
 }
 function trialSeconds() {
   const T = timing();
-  return T.fixation_s + T.stimulus_s + T.recovery_s + (S.paperMode ? 0 : RATING_SECONDS);
+  return T.fixation_s + T.stimulus_s + T.recovery_s + (S.paperMode && !S.blindRating ? 0 : RATING_SECONDS);
 }
 
 /* ---------------- 시작 ---------------- */
@@ -101,6 +101,7 @@ async function init() {
   setupDevice();
   setupUpload();
   $("#paper-mode").onchange = renderOverview;
+  $("#live-mode").onchange = renderOverview;
   document.querySelectorAll('input[name="mode"]').forEach((r) => (r.onchange = () => setMode(r.value)));
   setMode(document.querySelector('input[name="mode"]:checked').value);
   const check = () => ($("#btn-start").disabled = !($("#participant").value.trim() && $("#consent").checked));
@@ -133,6 +134,7 @@ function setMode(mode) {
 }
 
 function renderOverview() {
+  $("#live-option").hidden = !$("#paper-mode").checked;
   if (S.mode === "upload") {
     $("#overview").innerHTML = [
       ["평소 취향 설문", `선택 · ${S.config.survey.length}문항`, "1분"],
@@ -145,7 +147,7 @@ function renderOverview() {
   const T = timing();
   const n = QUICK ? Math.min(4, S.config.n_stimuli) : S.config.n_stimuli;
   if ($("#paper-mode").checked) {
-    $("#overview").textContent = `배선 설정 → 장비·카메라 확인 → 휴식 및 사진 ${n}장 → EEG 분석 → 서면 점수 비교`;
+    $("#overview").textContent = `배선 설정 → 휴식 → 사진 ${n}장${$("#live-mode").checked ? "과 사진별 1–9점 응답" : ""} → EEG 분석 → 설문 비교`;
     return;
   }
   const steps = [
@@ -188,6 +190,7 @@ async function checkResume() {
 function resume(saved, p) {
   S.session = saved.session; S.participant = saved.participant;
   S.paperMode = !!saved.paperMode;
+  S.blindRating = !!saved.blindRating;
   S.trials = saved.trials; preload(S.trials);
   const doneSet = new Set(p.completed_trials);
   S.nextTrial = S.trials.findIndex((t) => !doneSet.has(t.trial_index));
@@ -229,7 +232,8 @@ async function startSession() {
   }
   try {
     S.paperMode = $("#paper-mode").checked;
-    const res = await api("/api/sessions", { participant_id: $("#participant").value.trim(), paper_mode:S.paperMode });
+    S.blindRating = !S.paperMode || $("#live-mode").checked;
+    const res = await api("/api/sessions", { participant_id: $("#participant").value.trim(), paper_mode:S.paperMode, blind_rating:S.blindRating });
     S.session = res.session_id; S.participant = $("#participant").value.trim();
     S.trials = QUICK ? res.trials.slice(0, 4) : res.trials;
     S.nextTrial = 0;
@@ -470,7 +474,8 @@ async function runBaseline() {
 
 /* ---------------- ③ 안내 → 자극 시행 ---------------- */
 function showTrialIntro() {
-  $("#view-trials .tips li:nth-child(2)").hidden = !!S.paperMode;
+  $("#live-guide").hidden = !S.blindRating;
+  $("#view-trials .tips li:nth-child(2)").hidden = !!(S.paperMode || S.blindRating);
   const T = timing();
   const left = S.trials.length - S.nextTrial;
   $("#trial-intro-count").textContent = S.nextTrial > 0
@@ -478,8 +483,8 @@ function showTrialIntro() {
       : `사진 ${left}장을 한 장씩 봅니다. 예상 시간 ${fmtMin(left * trialSeconds())}.`;
   $("#trial-timeline").innerHTML = [
     ["+ 응시", `${T.fixation_s}초`, ""], ["사진 감상", `${T.stimulus_s}초`, "stim"],
-    ["빈 화면", `${T.recovery_s}초`, ""], ["평가", "좋아요 1–9 · 본 적 있음", ""],
-  ].filter(([label])=>!S.paperMode || label!=="평가").map(([a, b, c]) => `<li class="${c}"><b>${a}</b><span>${b}</span></li>`).join("");
+    ["빈 화면", `${T.recovery_s}초`, ""], ["평가", S.blindRating ? "사진 선호도 1–9" : "좋아요 1–9 · 본 적 있음", ""],
+  ].filter(([label])=>S.blindRating || !S.paperMode || label!=="평가").map(([a, b, c]) => `<li class="${c}"><b>${a}</b><span>${b}</span></li>`).join("");
   $("#btn-begin-trials").textContent = S.nextTrial > 0 ? "이어서 측정" : "측정 시작";
   show("trials");
 }
@@ -539,6 +544,10 @@ async function runTrials() {
     await sleep(T.recovery_s * 1000);
     // 평정
     const capture = movement.snapshot(tr.stimulus_id);
+    if (S.blindRating) {
+      marker("rating_shown", tr);
+      capture.live_liking = (await askRating(i)).liking;
+    }
     for (;;) {
       try {
         await api(`/api/sessions/${S.session}/capture/${tr.trial_index}`, capture);
@@ -549,7 +558,7 @@ async function runTrials() {
         }
       }
     }
-    if (!S.paperMode) {
+    if (!S.paperMode && !S.blindRating) {
       marker("rating_shown", tr);
       const r = await askRating(i);
       await api(`/api/sessions/${S.session}/ratings`, { trial_index: tr.trial_index, stimulus_id: tr.stimulus_id, ...r }).catch(e=>toast(e.message));
@@ -655,6 +664,7 @@ function askRating(i) {
   $("#stage-msg").textContent = S.pauseRequested ? "평가 후 잠시 멈춰요" : "";
   $("#trial-counter").textContent = `${i + 1} / ${S.trials.length}`;
   const scale = $("#liking-scale");
+  $("#seen-question").hidden = $("#seen-scale").hidden = !!S.blindRating;
   scale.innerHTML = "";
   for (let v = 1; v <= 9; v++) scale.insertAdjacentHTML("beforeend", `<button data-v="${v}" role="radio" aria-checked="false">${v}</button>`);
   let liking = null, seen = null;
@@ -666,7 +676,7 @@ function askRating(i) {
     $("#seen-scale").querySelectorAll("button").forEach((b) => {
       const on = seen !== null && +b.dataset.seen === +seen; b.classList.toggle("sel", on); b.setAttribute("aria-checked", String(on));
     });
-    btn.disabled = liking === null || seen === null;
+    btn.disabled = liking === null || (!S.blindRating && seen === null);
   };
   refresh();
   return new Promise((resolve) => {
@@ -841,7 +851,7 @@ async function finish() {
   try {
     const result = await api(`/api/sessions/${S.session}/finish`, {});
     store.clear();
-    if (S.paperMode) { location.assign("/static/field.html?session="+encodeURIComponent(S.session)); return; }
+    if (S.paperMode || S.blindRating) { location.assign("/static/field.html?session="+encodeURIComponent(S.session)); return; }
     renderResults(result);
   } catch (e) {
     $("#inference-error").textContent = `계산하지 못했어요: ${e.message}`;
