@@ -96,13 +96,25 @@ class PaperScores(BaseModel):
 
 
 def evaluate(result, form):
+    """서면 점수와 비교. 위쪽 값은 기존 4채널 모델(posterior), by_model에 모델별 결과를 함께 담는다."""
+    out = _evaluate(result, form, "posterior_liking")
+    out["by_model"] = {"posterior": {k: out[k] for k in ("n", "mae", "rmse", "within_one")}}
+    if any(item.get("m1_liking") is not None for item in result["items"]):
+        m1 = _evaluate(result, form, "m1_liking")
+        out["by_model"]["m1"] = {k: m1[k] for k in ("n", "mae", "rmse", "within_one")}
+        for row, other in zip(out["rows"], m1["rows"]):
+            row["prediction_m1"], row["error_m1"] = other["prediction"], other["error"]
+    return out
+
+
+def _evaluate(result, form, field):
     groups = {}
     for item in result["items"]:
         key = item["stimulus_id" if form.level == "photo" else "category"]
         if key:
             values = groups.setdefault(key, [])
-            if item.get("posterior_liking") is not None:
-                values.append(item["posterior_liking"])
+            if item.get(field) is not None:
+                values.append(item[field])
     if not form.scores or not set(form.scores) <= groups.keys():
         raise ValueError("측정한 사진 또는 범주의 점수를 하나 이상 입력하세요.")
     rows = []

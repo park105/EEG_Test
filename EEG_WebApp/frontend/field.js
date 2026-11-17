@@ -10,8 +10,13 @@ async function request(url,body){
 const endpoint=()=>"/api/sessions/"+encodeURIComponent(id)+"/paper";
 function metrics(p){
   el("errors").replaceChildren();
-  el("metrics").textContent=p?`비교 가능한 ${p.level==="photo"?"사진":"범주"} ${p.n}개 · MAE ${fmt(p.mae)}점 · RMSE ${fmt(p.rmse)}점 · ±1점 이내 ${Number.isFinite(p.within_one)?Math.round(p.within_one*100)+"%":"—"} (1–9점 환산)`:"";
-  for(const r of p?.rows||[])el("errors").append(node("p",`${cat[r.key]||r.key} · 설문 환산 ${fmt(r.target)} / EEG ${fmt(r.prediction)} / 차이 ${fmt(r.error)}`));
+  const pct=v=>Number.isFinite(v)?Math.round(v*100)+"%":"—";
+  const line=(name,m)=>`${name}: ${m.n}개 · MAE ${fmt(m.mae)}점 · RMSE ${fmt(m.rmse)}점 · ±1점 이내 ${pct(m.within_one)}`;
+  const models=p?.by_model||(p?{posterior:p}:{});
+  el("metrics").textContent=p?`비교 가능한 ${p.level==="photo"?"사진":"범주"} (1–9점 환산) — `+
+    [models.posterior&&line("4채널 모델",models.posterior),models.m1&&line("m1 방식 모델",models.m1)].filter(Boolean).join(" / "):"";
+  for(const r of p?.rows||[])el("errors").append(node("p",`${cat[r.key]||r.key} · 설문 환산 ${fmt(r.target)} / 4채널 ${fmt(r.prediction)} (차이 ${fmt(r.error)})`+
+    (r.prediction_m1!==undefined?` / m1 ${fmt(r.prediction_m1)} (차이 ${fmt(r.error_m1)})`:"")));
 }
 function inputs(){
   const level=el("level").value,p=papers[level], box=el("scores");box.replaceChildren();
@@ -43,14 +48,15 @@ async function init(){
   el("status").textContent=(result.synthetic?"모의 EEG · ":"")+"참가자 "+result.participant_id+" · "+id;
   el("analysis").hidden=el("survey").hidden=false;
   result.items.sort((a,b)=>a.trial_index-b.trial_index);
-  el("summary").textContent=`측정 ${result.n_trials}회 · 4채널 예측 ${result.items.filter(r=>Number.isFinite(r.posterior_liking)).length}회 · ${result.posterior_liking_note||""}`;
+  el("summary").textContent=`측정 ${result.n_trials}회 · 4채널 예측 ${result.items.filter(r=>Number.isFinite(r.posterior_liking)).length}회 · ${result.posterior_liking_note||""}`+
+    ` · m1 방식 예측 ${result.items.filter(r=>Number.isFinite(r.m1_liking)).length}회${result.m1_liking_note?" ("+result.m1_liking_note+")":""}`;
   const assoc=result.camera_associations||{};
   el("assoc").textContent=["smile_delta","shoulder_delta"].map((k,i)=>`감마와 ${i?"어깨":"입꼬리"} 변화의 순위상관 ρ ${fmt(assoc[k]?.rho)} (사진 ${assoc[k]?.n||0}개)`).join(" · ");
   for(const r of result.items){
     const tr=node("tr",""), c=r.camera||{};
     const label=node("td",r.title+" ("+r.stimulus_id+")");
     if(r.src?.startsWith("/")){const img=document.createElement("img");img.src=r.src;img.width=64;img.alt="";label.prepend(img);}
-    tr.append(label,...[fmt(r.posterior_liking),fmt(r.gamma_db),...["smile","shoulder"].map(k=>fmt(c[k+"_delta"])+" ("+(c[k+"_base_n"]||0)+"/"+(c[k+"_photo_n"]||0)+")")].map(v=>node("td",v)));el("trials").append(tr);
+    tr.append(label,...[fmt(r.posterior_liking),fmt(r.m1_liking),fmt(r.gamma_db),...["smile","shoulder"].map(k=>fmt(c[k+"_delta"])+" ("+(c[k+"_base_n"]||0)+"/"+(c[k+"_photo_n"]||0)+")")].map(v=>node("td",v)));el("trials").append(tr);
   }
   el("level").onchange=inputs;el("scale").onchange=()=>document.querySelectorAll("#scores input").forEach(i=>i.max=el("scale").value);
   inputs();

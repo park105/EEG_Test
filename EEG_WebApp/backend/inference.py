@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import deap_model, posterior
+from . import deap_model, m1_liking, posterior
 from . import field_analysis
 from . import features as feat
 from .export import export_session, build_trials
@@ -105,6 +105,7 @@ def run(session_dir: Path, stimuli: list[dict], survey_items: list[dict], featur
     eval_info: dict = {}
     integrity = export_session(session_dir, fs, list(meta["source"]["channels"]), "uV")
     liking_scores, liking_note = posterior.predict_session(eeg, trials, fs, integrity)
+    m1_scores, m1_note = m1_liking.predict_session(eeg, trials, fs, integrity)
     deap, deap_note = deap_model.apply(session_dir, integrity["model_input"])
     if deap is not None:
         model_name, model_desc = "deap_ensemble", "DEAP 사전학습 앙상블(EEG_Test deap_ml)"
@@ -176,6 +177,7 @@ def run(session_dir: Path, stimuli: list[dict], survey_items: list[dict], featur
             "category": stim.get("category"), "tone": stim.get("tone"),
             "quality": r["quality"],
             "posterior_liking": liking_scores.get(r["trial_index"]),
+            "m1_liking": m1_scores.get(int(r["trial_index"])),
             "gamma_db": float(r.gamma_db) if integrity["model_input"] and pd.notna(r.gamma_db) else None,
             "camera": field_analysis.summarize_capture(session_dir, int(r.trial_index), r.stimulus_id),
             "eeg_like_probability": None if np.isnan(p) else round(p, 3),
@@ -194,6 +196,7 @@ def run(session_dir: Path, stimuli: list[dict], survey_items: list[dict], featur
         "mode": meta.get("mode", "device"), "upload_warnings": meta.get("upload_warnings", []),
         "has_survey": bool(answers),
         "posterior_liking_note": liking_note,
+        "m1_liking_note": m1_note, "m1_liking_eval": m1_liking.evaluation_summary(),
         "upload_files": " + ".join(meta.get("files", {}).values()) if meta.get("mode") == "upload" else None,
         "label": "EEG 기반 추정", "disclaimer": DISCLAIMER,
         "model": {"name": model_name, "description": model_desc, "feature_channels": channels,
