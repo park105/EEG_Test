@@ -21,18 +21,30 @@ EVENT_COLUMNS = ["trial_id", "stimulus_id", "baseline_start_s", "onset_s", "offs
 LOADER_RTOL = 0.02  # brainficial EEGLoader가 허용하는 샘플 간격 오차
 
 
-def build_events(markers: pd.DataFrame, ratings: pd.DataFrame) -> pd.DataFrame:
+def build_trials(markers: pd.DataFrame) -> pd.DataFrame:
     m = markers.dropna(subset=["trial_index"])
     rows = []
     for idx, g in m.groupby("trial_index"):
+        # A retry reuses the trial index. Only markers from its last attempt belong together.
+        g = g.sort_values("server_ts", kind="stable").reset_index(drop=True)
+        starts = g.index[g.name == "fixation_onset"]
+        if not len(starts):
+            continue
+        g = g.loc[starts[-1]:]
+        if g.name.eq("trial_aborted").any():
+            continue
         times = dict(zip(g["name"], g["server_ts"]))
-        if not {"fixation_onset", "stimulus_onset", "stimulus_offset"} <= times.keys():
-            continue  # 중단된 시행
-        rows.append({"trial_index": int(idx), "trial_id": f"T{int(idx):03d}",
-                     "stimulus_id": g["stimulus_id"].dropna().iloc[0],
-                     "baseline_start_s": times["fixation_onset"], "onset_s": times["stimulus_onset"],
-                     "offset_s": times["stimulus_offset"]})
-    ev = pd.DataFrame(rows, columns=["trial_index", "trial_id", "stimulus_id", "baseline_start_s", "onset_s", "offset_s"])
+        if {"fixation_onset", "stimulus_onset", "stimulus_offset"} <= times.keys():
+            rows.append({"trial_index": int(idx), "stimulus_id": g["stimulus_id"].dropna().iloc[0],
+                         "fixation_onset": times["fixation_onset"], "stimulus_onset": times["stimulus_onset"],
+                         "stimulus_offset": times["stimulus_offset"]})
+    return pd.DataFrame(rows, columns=["trial_index", "stimulus_id", "fixation_onset", "stimulus_onset", "stimulus_offset"])
+
+
+def build_events(markers: pd.DataFrame, ratings: pd.DataFrame) -> pd.DataFrame:
+    ev = build_trials(markers).rename(columns={"fixation_onset": "baseline_start_s",
+                                               "stimulus_onset": "onset_s", "stimulus_offset": "offset_s"})
+    ev["trial_id"] = ev.trial_index.map(lambda i: f"T{int(i):03d}")
     r = ratings.rename(columns={"liking": "rating", "server_ts": "rating_time_s"})
     ev = ev.merge(r[["trial_index", "rating", "seen_before", "rating_time_s"]], on="trial_index", how="left")
     return ev

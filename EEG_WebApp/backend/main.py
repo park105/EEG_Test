@@ -7,6 +7,7 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+import os
 import shutil
 import threading
 from contextlib import asynccontextmanager
@@ -19,11 +20,13 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import inference, upload
+from . import field_analysis
 from .demo import make_demo
 from .config import settings
 from .eeg import create_source
 from .eeg.base import Acquisition
 from .quality import channel_quality
+from . import lab_setup
 from .session import Session
 
 
@@ -36,6 +39,7 @@ SURVEY: list[dict] = load_json("survey.json")["items"]
 
 
 class State:
+    layout = None
     acquisition: Optional[Acquisition] = None
     session: Optional[Session] = None
     lock = threading.Lock()
@@ -78,7 +82,13 @@ def require_streaming() -> None:
 def open_acquisition() -> Acquisition:
     """소스를 열고 첫 샘플이 실제로 들어올 때까지 기다린다. 안 들어오면 닫고 실패로 돌려준다."""
     try:
-        source = create_source(settings)
+        if settings.source == "lsl" and not state.layout and os.environ.get("LAB_REQUIRE_LAYOUT") == "1":
+            raise ValueError("시작 화면의 EEG 배선 설정에서 장비와 입력 위치를 먼저 지정하세요.")
+        if settings.source == "lsl" and state.layout:
+            from .eeg.lsl_source import LSLSource
+            source = LSLSource(layout=state.layout)
+        else:
+            source = create_source(settings)
         if hasattr(source, "set_stimuli"):
             source.set_stimuli(STIMULI)
         acq = Acquisition(source)
@@ -115,6 +125,40 @@ def get_config():
 
 
 # ---------------- ② 장비 ----------------
+@app.get("/api/lab/streams")
+def lab_streams():
+    try:
+        return lab_setup.streams()
+    except Exception as exc:
+        raise HTTPException(503, f"LSL 검색 실패: {exc}")
+
+
+@app.post("/api/lab/layout")
+def apply_layout(layout: lab_setup.Layout):
+    with state.lock:
+        if state.session and state.session.recording:
+            raise HTTPException(409, "기록 중에는 채널 설정을 바꿀 수 없습니다.")
+        if state.acquisition:
+            state.acquisition.stop()
+            state.acquisition = None
+        settings.source = "lsl"
+        state.layout = layout
+        return _reopen()
+
+
+@app.post("/api/lab/rehearsal")
+def rehearsal():
+    with state.lock:
+        if state.session and state.session.recording:
+            raise HTTPException(409, "기록 중에는 모드를 바꿀 수 없습니다.")
+        if state.acquisition:
+            state.acquisition.stop()
+            state.acquisition = None
+        state.layout = None
+        settings.source = "mock"
+        return {"kind": "mock"}
+
+
 @app.post("/api/device/connect")
 def connect_device():
     with state.lock:
@@ -174,11 +218,14 @@ def device_status():
 # ---------------- 세션 ----------------
 class NewSession(BaseModel):
     participant_id: str = Field(min_length=1, max_length=64)
+    paper_mode: bool = False
 
 
 @app.post("/api/sessions")
 def create_session(body: NewSession):
     if state.session and state.session.recording:
+        if state.acquisition:
+            state.acquisition.remove_sink(state.session.write_samples)
         state.session.stop_recording()
     info = source_info()
     t = settings.timing
@@ -187,6 +234,8 @@ def create_session(body: NewSession):
                               "stimulus_s": t.stimulus_s, "recovery_s": t.recovery_s},
                              settings.order_seed)
     state.session = session
+    session.meta["paper_mode"] = body.paper_mode
+    session.save_meta()
     by_id = {s["id"]: s for s in STIMULI}
     return {"session_id": session.id,
             "trials": [{"trial_index": i, "stimulus_id": sid, "type": by_id[sid].get("type", "image"),
@@ -230,6 +279,8 @@ def session_progress(session_id: str):
         done = sorted({int(r["trial_index"]) for r in _csv.DictReader(f)})
     with (s.dir / "markers.csv").open(encoding="utf-8") as f:
         names = {r["name"] for r in _csv.DictReader(f)}
+    if s.meta.get("paper_mode"):
+        done = [int(path.stem.split("_")[1]) for path in s.dir.glob("capture_*.json")]
     return {"active": True, "recording": s.recording, "status": s.meta.get("status"),
             "survey_done": (s.dir / "survey.json").exists(),
             "baseline_done": "baseline_end" in names, "completed_trials": done,
@@ -274,9 +325,46 @@ def post_rating(session_id: str, r: Rating):
 
 
 # ---------------- ④ 추론 / ⑤ 결과 ----------------
+@app.post("/api/sessions/{session_id}/capture/{idx}")
+def save_capture(session_id: str, idx: int, body: field_analysis.TrialCapture):
+    s = require_session(session_id)
+    order = s.meta["order"]
+    if not 0 <= idx < len(order) or order[idx] != body.stimulus_id or not s.recording:
+        raise HTTPException(409, "기록 중인 세션의 사진 ID와 시행 번호를 확인하세요.")
+    field_analysis.write_json(s.dir / f"capture_{idx}.json", body.model_dump())
+    return {"saved": len(body.samples)}
+
+
+@app.get("/api/sessions/{session_id}/paper")
+def read_paper(session_id: str):
+    result = get_results(session_id)
+    directory = settings.data_dir / session_id
+    papers = {level: json.loads(path.read_text(encoding="utf8")) for level in ("photo","category")
+              if (path := directory / f"paper_{level}.json").exists()}
+    return {"result": result, "papers": papers}
+
+
+@app.get("/api/field/sessions")
+def field_sessions():
+    return sorted((p.parent.name for p in settings.data_dir.glob("*/results.json")), reverse=True)
+
+
+@app.post("/api/sessions/{session_id}/paper")
+def save_paper(session_id: str, body: field_analysis.PaperScores):
+    result = get_results(session_id)
+    try:
+        evaluation = field_analysis.evaluate(result, body)
+    except ValueError as err:
+        raise HTTPException(422, str(err))
+    field_analysis.write_json(settings.data_dir / session_id / f"paper_{body.level}.json", evaluation)
+    return evaluation
+
+
 @app.post("/api/sessions/{session_id}/finish")
 async def finish(session_id: str):
     session = require_session(session_id)
+    if session.meta.get("status") == "finished" and (session.dir/"results.json").is_file():
+        return get_results(session_id)
     if state.acquisition:  # 장비가 끊긴 채로 끝내도 지금까지의 기록으로 결과를 낸다
         session.add_marker(state.acquisition.source.now(), "recording_end")
         state.acquisition.remove_sink(session.write_samples)

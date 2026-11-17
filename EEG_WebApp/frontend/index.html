@@ -26,16 +26,19 @@
         <h1>사진을 볼 때의 뇌파로<br>선호를 추정해 봐요</h1>
         <p class="lead">장비를 연결해 직접 측정하거나, 이미 기록한 뇌파 파일을 올려 추정할 수 있어요.
           결과는 <b>EEG 기반 추정</b>이며, 취향을 단정하지 않아요.</p>
+        <p><a href="/static/wiring.html">EEG 배선 설정 · 장비 입력과 전극 위치 연결</a></p>
         <div class="mode-pick" role="radiogroup" aria-label="진행 방식">
           <label class="mode-card"><input type="radio" name="mode" value="device" checked>
             <span class="mode-ico" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12h3l2-5 3 10 3-7 2 2h5"/></svg></span>
-            <span><b>장비로 측정</b><span class="muted small">설문 → 장비 연결·휴식 측정 → 사진 감상과 평가</span></span></label>
+            <span><b>장비로 측정</b><span class="muted small">장비 연결 · 휴식 측정 · 사진 감상</span></span></label>
           <label class="mode-card"><input type="radio" name="mode" value="upload">
             <span class="mode-ico" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></span>
             <span><b>데이터 파일로 추론</b><span class="muted small">기록해 둔 EEG와 이벤트 파일을 올리면 바로 결과</span></span></label>
         </div>
+        <label class="check" id="paper-option"><input id="paper-mode" type="checkbox" checked>서면 설문 사용 · 측정이 끝난 뒤 점수 입력</label>
+        <p><a href="/static/field.html">저장된 측정 결과와 서면 설문 열기</a></p>
         <ol class="overview" id="overview"></ol>
         <div id="resume-box" class="notice" hidden>
           <div><b>진행 중인 측정이 있어요.</b> <span id="resume-detail"></span></div>
@@ -84,6 +87,13 @@
             <p class="muted">장비를 연결하고 모든 채널이 <span class="q good">양호</span> 또는 <span class="q fair">보통</span>이 될 때까지 전극을 조정해 주세요.</p>
           </div>
         </div>
+        <details open><summary>노트북 카메라 · 입꼬리와 어깨 움직임</summary>
+          <p>얼굴과 양쪽 어깨가 보이도록 앉아 주세요. 영상은 저장하지 않고 사진별 움직임 수치만 기록합니다.</p>
+          <label><input type="checkbox" id="cam-consent"> 영상 기반 움직임 기록에 동의합니다</label>
+          <button id="cam-on">카메라 켜기</button> <button id="cam-off">끄기</button>
+          <p id="cam-status" role="status">카메라 꺼짐</p><video id="cam-preview" width="240" muted playsinline></video>
+        </details>
+        <p><a target="_blank" href="/static/operator.html">진행자 모니터 열기 ↗</a> · 보조 화면에 두세요.</p>
         <div class="device-bar">
           <button id="btn-connect" class="primary">장비 연결</button>
           <div id="device-info" class="muted" aria-live="polite">아직 연결되지 않았어요.</div>
@@ -291,6 +301,7 @@ city_02,72.0,75.0,79.0,3,1</pre>
     </div>
   </div>
 
+  <script src="/static/movement.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

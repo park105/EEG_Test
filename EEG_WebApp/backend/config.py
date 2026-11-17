@@ -38,7 +38,7 @@ class Settings:
     # 모의 EEG 채널 구성
     # 모의 EEG 채널 구성: EEG_Test DEAP 모델 기본 16채널(전두+중심)과 같은 이름
     mock_channels: list[str] = field(default_factory=lambda: _env_list(
-        "MOCK_CHANNELS", "Fp1,AF3,F3,F7,FC5,FC1,C3,Fp2,AF4,Fz,F4,F8,FC6,FC2,Cz,C4"))
+        "MOCK_CHANNELS", "Fp1,AF3,F3,F7,FC5,FC1,C3,Fp2,AF4,Fz,F4,F8,FC6,FC2,Cz,C4,O1,Oz,O2,Pz"))
     mock_fs: float = float(_env("MOCK_FS", "250"))
     mock_seed: int = int(_env("MOCK_SEED", "7"))
     # BrainFlow: board_id는 BrainFlow 문서의 BoardIds 값 (-1 = BrainFlow 합성 보드, 0 = OpenBCI Cyton 등)

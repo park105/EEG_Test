@@ -1,0 +1,31 @@
+"""Start the local session server and open wiring setup after the port is listening."""
+import os
+import webbrowser
+import json
+from urllib.error import URLError
+from urllib.request import urlopen
+
+import uvicorn
+
+
+class LabServer(uvicorn.Server):
+    async def startup(self, sockets=None):
+        await super().startup(sockets)
+        if self.started:
+            url = f"http://127.0.0.1:{self.config.port}/static/wiring.html"
+            print(url, flush=True)
+            webbrowser.open(url)
+
+
+if __name__ == "__main__":
+    try:
+        with urlopen("http://127.0.0.1:8766/openapi.json", timeout=1) as response:
+            if "/api/field/sessions" in json.load(response).get("paths", {}):
+                webbrowser.open("http://127.0.0.1:8766/static/wiring.html")
+                raise SystemExit(0)
+    except (URLError, OSError, ValueError):
+        pass
+    os.environ["EEG_SOURCE"] = "lsl"
+    os.environ["LAB_REQUIRE_LAYOUT"] = "1"
+    LabServer(uvicorn.Config("backend.main:app", host="127.0.0.1", port=8766)).run()
+

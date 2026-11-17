@@ -10,9 +10,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import deap_model
+from . import deap_model, posterior
+from . import field_analysis
 from . import features as feat
-from .export import export_session
+from .export import export_session, build_trials
 from .model import FrontalAsymmetryBaseline, PersonalLogistic, feature_columns, out_of_fold_personal
 
 LIKE_MIN, DISLIKE_MAX = 6, 4          # 1–9 평정: 6 이상 좋아함, 4 이하 싫어함, 5 중립
@@ -35,18 +36,6 @@ def survey_expectation(stimulus: dict, survey_items: list[dict], answers: dict) 
         if any(stimulus.get(k) == v for k, v in target.items()) and item["id"] in answers:
             values.append(float(answers[item["id"]]))
     return float(np.mean(values)) if values else None
-
-
-def build_trials(markers: pd.DataFrame) -> pd.DataFrame:
-    m = markers.dropna(subset=["trial_index"])
-    rows = []
-    for idx, g in m.groupby("trial_index"):
-        times = dict(zip(g["name"], g["server_ts"]))
-        if {"fixation_onset", "stimulus_onset", "stimulus_offset"} <= times.keys():
-            rows.append({"trial_index": int(idx), "stimulus_id": g["stimulus_id"].dropna().iloc[0],
-                         "fixation_onset": times["fixation_onset"], "stimulus_onset": times["stimulus_onset"],
-                         "stimulus_offset": times["stimulus_offset"]})
-    return pd.DataFrame(rows)
 
 
 def resting_summary(eeg: pd.DataFrame, markers: pd.DataFrame, fs: float, channels: list[str]) -> dict:
@@ -73,6 +62,9 @@ def run(session_dir: Path, stimuli: list[dict], survey_items: list[dict], featur
     ratings = pd.read_csv(session_dir / "ratings.csv") if (session_dir / "ratings.csv").exists() \
         else pd.DataFrame(columns=["trial_index", "liking", "seen_before"])
     fs = float(meta["source"]["fs"])
+    recorded_layout = meta["source"].get("input_layout")
+    if recorded_layout:
+        feature_channels = [w["name"] for w in recorded_layout["wires"] if w["kind"] == "EEG"]
     channels = [c for c in feature_channels if c in eeg.columns]
     channel_note = None
     if not channels:
@@ -92,7 +84,11 @@ def run(session_dir: Path, stimuli: list[dict], survey_items: list[dict], featur
             f, status = {}, "short_window"
         else:
             f, status = feat.trial_features(base, stim, fs, channels)
-        rows.append({**tr, "quality": status, **f})
+        gamma = None
+        if status == "ok" and all(c in eeg for c in posterior.CHANNELS):
+            photo = (t >= tr["stimulus_onset"]) & (t < tr["stimulus_offset"])
+            gamma = field_analysis.gamma_db(eeg.loc[photo, posterior.CHANNELS].to_numpy(float), fs)
+        rows.append({**tr, "quality": status, "gamma_db": gamma, **f})
     df = pd.DataFrame(rows)
     if df.empty:
         raise ValueError("완료된 시행이 없습니다.")
@@ -108,6 +104,7 @@ def run(session_dir: Path, stimuli: list[dict], survey_items: list[dict], featur
     proba = pd.Series(np.nan, index=usable.index)
     eval_info: dict = {}
     integrity = export_session(session_dir, fs, list(meta["source"]["channels"]), "uV")
+    liking_scores, liking_note = posterior.predict_session(eeg, trials, fs, integrity)
     deap, deap_note = deap_model.apply(session_dir, integrity["model_input"])
     if deap is not None:
         model_name, model_desc = "deap_ensemble", "DEAP 사전학습 앙상블(EEG_Test deap_ml)"
@@ -178,6 +175,9 @@ def run(session_dir: Path, stimuli: list[dict], survey_items: list[dict], featur
             "title": stim.get("title", r["stimulus_id"]), "src": stim.get("src"),
             "category": stim.get("category"), "tone": stim.get("tone"),
             "quality": r["quality"],
+            "posterior_liking": liking_scores.get(r["trial_index"]),
+            "gamma_db": float(r.gamma_db) if integrity["model_input"] and pd.notna(r.gamma_db) else None,
+            "camera": field_analysis.summarize_capture(session_dir, int(r.trial_index), r.stimulus_id),
             "eeg_like_probability": None if np.isnan(p) else round(p, 3),
             "confidence": None if conf is None else round(conf, 3),
             "eeg_label": eeg_label,
@@ -189,9 +189,11 @@ def run(session_dir: Path, stimuli: list[dict], survey_items: list[dict], featur
         })
     result = {
         "session_id": meta["session_id"], "participant_id": meta["participant_id"],
+        "camera_associations": field_analysis.associations(items),
         "synthetic": bool(meta["source"].get("synthetic")), "source": meta["source"]["kind"],
         "mode": meta.get("mode", "device"), "upload_warnings": meta.get("upload_warnings", []),
         "has_survey": bool(answers),
+        "posterior_liking_note": liking_note,
         "upload_files": " + ".join(meta.get("files", {}).values()) if meta.get("mode") == "upload" else None,
         "label": "EEG 기반 추정", "disclaimer": DISCLAIMER,
         "model": {"name": model_name, "description": model_desc, "feature_channels": channels,

@@ -1,0 +1,21 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EEG 배선 설정</title><link rel="stylesheet" href="/static/style.css">
+<style>main{max-width:900px;margin:auto;padding:2rem 1rem}table{border-collapse:collapse;width:100%;margin:1rem 0}td,th{text-align:left;padding:.45rem;border-bottom:1px solid #8886}select,input{max-width:100%;padding:.5rem}input[list]{width:9rem}fieldset{margin:1rem 0;padding:1rem}#message{white-space:pre-line}button{margin:.25rem}label{display:inline-block}a{color:inherit}</style></head>
+<body><main><h1>EEG 배선 설정</h1>
+<p>지텍 프로그램에서 EEG 송출을 시작한 뒤, 장비의 입력 번호와 실제 배선표를 맞춰 주세요.</p>
+<p>측정 위치는 O1 · Oz · O2 · Pz입니다. 기준 전극(REF)과 접지(GND)의 위치·단자는 사용 장비의 배선도에서 확인하고, 이 표의 EEG 입력에는 배정하지 마세요.</p>
+<button id="scan">LSL 장비 검색</button> <select id="sources" aria-label="LSL 장비"></select>
+<p>장비가 없으면 먼저 배선표를 작성할 수 있습니다. <label>입력 수 <input id="count" type="number" value="4" min="1" max="512" style="width:5rem"></label> <button id="manual">빈 배선표 열기</button></p>
+<section id="panel" hidden>
+<p>기록할 위치를 선택하거나 직접 입력하세요. 비워 둔 입력은 제외합니다. 입력 단위는 제조사 표시를 확인하세요.</p>
+<datalist id="sites"><option>O1</option><option>Oz</option><option>O2</option><option>Pz</option><option>F3</option><option>F4</option><option>C3</option><option>C4</option></datalist>
+<label>전체 입력 단위 <select id="allunit"><option value="">선택</option><option>uV</option><option>mV</option><option>V</option></select></label>
+<table><thead><tr><th>장비 입력</th><th>송출 이름</th><th>실제 EEG 위치</th><th>입력 단위</th></tr></thead><tbody id="rows"></tbody></table>
+<p id="coverage"></p><button id="save">이 PC에 배선표 저장</button> <button id="restore">저장한 배선표 불러오기</button>
+<label><input id="confirm" type="checkbox"> 입력 번호·전극 위치·단위를 확인했습니다.</label>
+<button id="connect">설정 적용 및 실제 신호 확인</button></section>
+<p id="message" role="status" aria-live="polite"></p>
+<p id="start" hidden><a href="/?quick=1">실장비 파일럿 (사진 4장)</a>　 <a href="/">본 측정</a></p>
+<hr><button id="mock">장비 없이 모의 EEG로 연습</button>　<a href="/">기존 파일 업로드 / 시작 화면</a>
+<script src="/static/wiring.js"></script></main></body></html>
+

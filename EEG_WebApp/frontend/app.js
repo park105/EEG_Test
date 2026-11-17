@@ -57,7 +57,7 @@ const store = {
   save() {
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify({ session: S.session, participant: S.participant,
-        trials: S.trials.map(({ preload, ...t }) => t), quick: QUICK }));
+        trials: S.trials.map(({ preload, ...t }) => t), quick: QUICK, paperMode:S.paperMode }));
     } catch (e) { /* 저장 불가 환경: 이어하기만 안 됨 */ }
   },
   load() { try { return JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { return null; } },
@@ -88,7 +88,7 @@ function timing() {
 }
 function trialSeconds() {
   const T = timing();
-  return T.fixation_s + T.stimulus_s + T.recovery_s + RATING_SECONDS;
+  return T.fixation_s + T.stimulus_s + T.recovery_s + (S.paperMode ? 0 : RATING_SECONDS);
 }
 
 /* ---------------- 시작 ---------------- */
@@ -100,6 +100,7 @@ async function init() {
   renderSurvey();
   setupDevice();
   setupUpload();
+  $("#paper-mode").onchange = renderOverview;
   document.querySelectorAll('input[name="mode"]').forEach((r) => (r.onchange = () => setMode(r.value)));
   setMode(document.querySelector('input[name="mode"]:checked').value);
   const check = () => ($("#btn-start").disabled = !($("#participant").value.trim() && $("#consent").checked));
@@ -117,6 +118,7 @@ function setMode(mode) {
   S.mode = mode;
   renderSteps(); renderOverview();
   const up = mode === "upload";
+  $("#paper-option").hidden = up;
   $("#consent-text").textContent = up
     ? "올리는 EEG 데이터를 이 용도로 쓸 권한이 있고, 서버에 저장되는 것에 동의합니다."
     : "실험 안내를 듣고 참여와 EEG·응답 저장에 동의합니다. 언제든 중단할 수 있어요.";
@@ -142,6 +144,10 @@ function renderOverview() {
   }
   const T = timing();
   const n = QUICK ? Math.min(4, S.config.n_stimuli) : S.config.n_stimuli;
+  if ($("#paper-mode").checked) {
+    $("#overview").textContent = `배선 설정 → 장비·카메라 확인 → 휴식 및 사진 ${n}장 → EEG 분석 → 서면 점수 비교`;
+    return;
+  }
   const steps = [
     ["평소 취향 설문", `${S.config.survey.length}문항`, 60],
     ["장비 연결과 신호 확인", "전극 상태 점검", 120],
@@ -181,11 +187,12 @@ async function checkResume() {
 
 function resume(saved, p) {
   S.session = saved.session; S.participant = saved.participant;
+  S.paperMode = !!saved.paperMode;
   S.trials = saved.trials; preload(S.trials);
   const doneSet = new Set(p.completed_trials);
   S.nextTrial = S.trials.findIndex((t) => !doneSet.has(t.trial_index));
   if (S.nextTrial < 0) S.nextTrial = S.trials.length;
-  if (!p.survey_done) return show("survey");
+  if (!p.survey_done && !S.paperMode) return show("survey");
   if (!p.recording || !p.baseline_done) {
     show("device");
     if (p.recording) afterConnected(p.device, false);
@@ -194,6 +201,11 @@ function resume(saved, p) {
   openSocket(); updateSourceBadge(p.device);
   S.dev = { connectedOnce: true, streaming: !!p.device.streaming, at: performance.now(), error: p.device.error || null };
   if (S.nextTrial >= S.trials.length) return finish();
+  if (confirm("측정을 재개합니다. 카메라를 다시 설정하려면 확인을 누르세요. 취소하면 EEG만 이어갑니다.")) {
+    show("device"); afterConnected(p.device,false);
+    $("#btn-baseline").disabled=false; $("#btn-baseline").textContent="사진 측정 이어서 하기";
+    $("#btn-baseline").onclick=showTrialIntro;return;
+  }
   showTrialIntro();
 }
 
@@ -216,13 +228,14 @@ async function startSession() {
     return;
   }
   try {
-    const res = await api("/api/sessions", { participant_id: $("#participant").value.trim() });
+    S.paperMode = $("#paper-mode").checked;
+    const res = await api("/api/sessions", { participant_id: $("#participant").value.trim(), paper_mode:S.paperMode });
     S.session = res.session_id; S.participant = $("#participant").value.trim();
     S.trials = QUICK ? res.trials.slice(0, 4) : res.trials;
     S.nextTrial = 0;
     preload(S.trials);
     store.save();
-    show("survey");
+    show(S.paperMode ? "device" : "survey");
   } catch (e) {
     toast(`시작할 수 없어요: ${e.message}`);
     $("#btn-start").disabled = false;
@@ -360,6 +373,7 @@ function openSocket() {
   ws.onmessage = (ev) => {
     const msg = JSON.parse(ev.data);
     if (msg.type === "signal" || msg.type === "quality") { S.dev.streaming = !!msg.streaming; S.dev.at = performance.now(); }
+    if (msg.type === "signal" || msg.type === "quality") fieldMonitor.postMessage(msg);
     if (msg.type === "quality") S.dev.error = msg.error || null;
     if (msg.type === "marker_rejected") { S.dev.streaming = false; S.rejected = true; }
     if (msg.type === "signal" && msg.streaming) drawScope(msg);
@@ -379,6 +393,7 @@ function setConn(ok) {
 function marker(name, trial = {}) {
   const m = { type: "marker", name, trial_index: trial.trial_index ?? null,
     stimulus_id: trial.stimulus_id ?? null, client_ts_ms: performance.now() };
+  movement.mark(name,trial,m.client_ts_ms);
   if (S.ws && S.ws.readyState === WebSocket.OPEN) S.ws.send(JSON.stringify(m));
   else api(`/api/sessions/${S.session}/markers`, m).catch(() => { S.rejected = true; toast("마커를 보내지 못했어요. 서버 연결을 확인하세요."); });
 }
@@ -455,15 +470,16 @@ async function runBaseline() {
 
 /* ---------------- ③ 안내 → 자극 시행 ---------------- */
 function showTrialIntro() {
+  $("#view-trials .tips li:nth-child(2)").hidden = !!S.paperMode;
   const T = timing();
   const left = S.trials.length - S.nextTrial;
   $("#trial-intro-count").textContent = S.nextTrial > 0
     ? `남은 사진 ${left}장을 이어서 볼게요. 예상 시간 ${fmtMin(left * trialSeconds())}.`
-    : `사진 ${left}장을 한 장씩 보고 평가해요. 예상 시간 ${fmtMin(left * trialSeconds())}.`;
+      : `사진 ${left}장을 한 장씩 봅니다. 예상 시간 ${fmtMin(left * trialSeconds())}.`;
   $("#trial-timeline").innerHTML = [
     ["+ 응시", `${T.fixation_s}초`, ""], ["사진 감상", `${T.stimulus_s}초`, "stim"],
     ["빈 화면", `${T.recovery_s}초`, ""], ["평가", "좋아요 1–9 · 본 적 있음", ""],
-  ].map(([a, b, c]) => `<li class="${c}"><b>${a}</b><span>${b}</span></li>`).join("");
+  ].filter(([label])=>!S.paperMode || label!=="평가").map(([a, b, c]) => `<li class="${c}"><b>${a}</b><span>${b}</span></li>`).join("");
   $("#btn-begin-trials").textContent = S.nextTrial > 0 ? "이어서 측정" : "측정 시작";
   show("trials");
 }
@@ -522,11 +538,22 @@ async function runTrials() {
     if (S.rejected || !deviceState().ok) { marker("trial_aborted", tr); i--; continue; }
     await sleep(T.recovery_s * 1000);
     // 평정
-    marker("rating_shown", tr);
-    const r = await askRating(i);
-    try {
-      await api(`/api/sessions/${S.session}/ratings`, { trial_index: tr.trial_index, stimulus_id: tr.stimulus_id, ...r });
-    } catch (e) { toast(`평가를 저장하지 못했어요: ${e.message}`); }
+    const capture = movement.snapshot(tr.stimulus_id);
+    for (;;) {
+      try {
+        await api(`/api/sessions/${S.session}/capture/${tr.trial_index}`, capture);
+        break;
+      } catch (e) {
+        if (!confirm(`시행 기록 저장 실패: ${e.message}\n다시 저장할까요? 취소하면 이 시행을 다시 측정할 수 있습니다.`)) {
+          marker("trial_aborted", tr); S.running=false; leaveStage(); showTrialIntro(); return;
+        }
+      }
+    }
+    if (!S.paperMode) {
+      marker("rating_shown", tr);
+      const r = await askRating(i);
+      await api(`/api/sessions/${S.session}/ratings`, { trial_index: tr.trial_index, stimulus_id: tr.stimulus_id, ...r }).catch(e=>toast(e.message));
+    }
     S.nextTrial = i + 1;
     setStageProgress(S.nextTrial / n);
     if (S.nextTrial < n && (S.pauseRequested || S.nextTrial === breakAt)) {
@@ -808,11 +835,13 @@ async function runUpload() {
 
 /* ---------------- ④ 추론 → ⑤ 결과 ---------------- */
 async function finish() {
+  movement.stop();
   show("inference");
   $("#inference-error").textContent = ""; $("#btn-retry").hidden = true;
   try {
     const result = await api(`/api/sessions/${S.session}/finish`, {});
     store.clear();
+    if (S.paperMode) { location.assign("/static/field.html?session="+encodeURIComponent(S.session)); return; }
     renderResults(result);
   } catch (e) {
     $("#inference-error").textContent = `계산하지 못했어요: ${e.message}`;
@@ -842,6 +871,7 @@ function renderResults(r) {
   $("#result-sub").textContent = `참가자 ${r.participant_id}${r.mode === "upload" ? " · 업로드 데이터" : ""}${files} · 분석 가능한 시행 ${r.n_usable}/${r.n_trials}개 · ${m.description}`;
   $("#synthetic-banner").hidden = !r.synthetic;
   const notes = [...(r.upload_warnings || [])];
+  if (r.posterior_liking_note) notes.push("DEAP 4채널 Liking 회귀 (O1·Oz·O2·Pz): " + r.posterior_liking_note);
   if (m.channel_note) notes.push(m.channel_note);
   $("#result-notes").hidden = !notes.length;
   $("#result-notes").innerHTML = notes.map((w) => `<li>${esc(w)}</li>`).join("");
@@ -934,6 +964,7 @@ function renderGrid(items, B) {
           <div class="title"><b>${esc(it.title)}</b><span class="prob">${pct(it.eeg_like_probability)}</span></div>
           <div class="bar" title="EEG 기반 추정 선호 확률"><span style="width:${(it.eeg_like_probability ?? 0) * 100}%"></span></div>
           <dl class="compare">
+            <dt>4채널 예측 Liking</dt><dd>${it.posterior_liking == null ? "측정 불가" : it.posterior_liking.toFixed(2) + " / 9"}</dd>
             <dt>EEG 추정</dt><dd>${LABEL_KO[it.eeg_label]}${it.confidence !== null ? ` · 신뢰도 ${pct(it.confidence)}` : ""}</dd>
             <dt>설문 기대</dt><dd>${LABEL_KO[it.survey_label]}${it.survey_expected ? ` (${it.survey_expected})` : ""}</dd>
             <dt>본인 평정</dt><dd>${it.rating ?? "-"} / 9${it.seen_before === null ? "" : it.seen_before ? " · 본 적 있음" : " · 처음 봄"}</dd>
@@ -955,7 +986,7 @@ function renderGrid(items, B) {
 function toCSV(items) {
   const cols = ["trial_index", "stimulus_id", "title", "category", "tone", "quality", "eeg_like_probability",
     "confidence", "eeg_label", "survey_expected", "survey_label", "rating", "rating_label", "seen_before", "agreement",
-    "rating_agreement"];
+    "rating_agreement", "posterior_liking"];
   const cell = (v) => (v === null || v === undefined ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v);
   return "﻿" + [cols.join(","), ...items.map((it) => cols.map((c) => cell(it[c])).join(","))].join("\n");
 }

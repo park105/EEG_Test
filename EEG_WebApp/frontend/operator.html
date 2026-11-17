@@ -1,0 +1,9 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><title>진행자 모니터</title><link rel="stylesheet" href="/static/style.css"><main><h1>진행자 모니터</h1><section class="card"><p id="signal">측정 창의 EEG 연결을 기다립니다.</p><div id="traces"></div><p id="phase"></p><p id="cam">카메라 꺼짐</p></section></main><script>
+const ch=new BroadcastChannel("brainficial-operator"),get=id=>document.getElementById(id);let last=0;
+ch.onmessage=({data:m})=>{
+if(m.camera)get("cam").textContent=m.camera;
+if(m.phase)get("phase").textContent=(m.photo||"")+" · "+m.phase;
+if(m.type==="quality"){last=Date.now();get("signal").textContent=m.error||(m.streaming?m.channels.map(c=>c.channel+" "+c.status).join(" · "):"신호 대기");}
+if(m.type==="signal"){const box=get("traces");box.replaceChildren();m.channels.forEach((name,i)=>{const row=document.createElement("div"),canvas=document.createElement("canvas");canvas.width=520;canvas.height=45;row.append(name+" ",canvas);box.append(row);const ctx=canvas.getContext("2d"),v=m.data[i];ctx.strokeStyle="#287765";ctx.beginPath();v.forEach((y,j)=>ctx.lineTo(520*j/v.length,22-Math.max(-21,Math.min(21,y/3))));ctx.stroke();});}};
+setInterval(()=>{if(last&&Date.now()-last>3500)get("signal").textContent="측정 창의 EEG 갱신 중단";},1000);
+</script></html>

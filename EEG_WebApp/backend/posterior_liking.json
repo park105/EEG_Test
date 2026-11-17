@@ -1,0 +1,40 @@
+{
+  "features": [
+    "feature_O1_theta_db",
+    "feature_O1_alpha_db",
+    "feature_O1_beta_db",
+    "feature_Oz_theta_db",
+    "feature_Oz_alpha_db",
+    "feature_Oz_beta_db",
+    "feature_O2_theta_db",
+    "feature_O2_alpha_db",
+    "feature_O2_beta_db",
+    "feature_Pz_theta_db",
+    "feature_Pz_alpha_db",
+    "feature_Pz_beta_db"
+  ],
+  "channels": [
+    "O1",
+    "Oz",
+    "O2",
+    "Pz"
+  ],
+  "weights": [
+    -0.015929935858881236,
+    -0.0067270311619293645,
+    -0.0273503967387497,
+    0.015201036342594388,
+    0.0037989375394249787,
+    -0.048057765795568766,
+    0.029580397843083445,
+    0.004126103520234239,
+    0.06913985772070996,
+    0.0035099372099357496,
+    -0.03382578213331269,
+    0.0005736549118437945
+  ],
+  "intercept": 5.532091318126376,
+  "target": "DEAP Liking 1-9",
+  "ridge_alpha": 100,
+  "training_trials": 1280
+}
