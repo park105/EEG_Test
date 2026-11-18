@@ -314,6 +314,7 @@ function setupDevice() {
     $("#btn-connect").disabled = true;
     S.connecting = true;
     $("#device-info").textContent = "연결 중… 장비에서 데이터가 들어오는지 확인하고 있어요.";
+    $("#mock-warning").hidden = true;
     try {
       const dev = await api(S.dev.connectedOnce ? "/api/device/reconnect" : "/api/device/connect", {});
       await api(`/api/sessions/${S.session}/recording/start`, {});
@@ -365,6 +366,7 @@ function afterConnected(dev, fresh) {
   $("#btn-connect").disabled = true;
   $("#btn-connect").textContent = "연결됨";
   $("#device-info").textContent = `${dev.kind} · ${dev.channels.length}채널 · ${dev.fs} Hz` + (dev.synthetic ? " · 합성 신호" : "") + (fresh ? "" : " · 기록 이어서 진행 중");
+  $("#mock-warning").hidden = !(dev.synthetic || dev.kind === "mock");
   $("#scope-empty").hidden = true;
   openSocket();
   updateGate();
@@ -882,6 +884,11 @@ function renderResults(r) {
   $("#synthetic-banner").hidden = !r.synthetic;
   const notes = [...(r.upload_warnings || [])];
   if (r.posterior_liking_note) notes.push("DEAP 4채널 Liking 회귀 (O1·Oz·O2·Pz): " + r.posterior_liking_note);
+  if (r.m1_liking_note) {
+    const ev = r.m1_liking_eval && r.m1_liking_eval.new_participant;
+    notes.push("m1 방식 Liking 회귀 (research/m1-deap 특징·Ridge, O1·Oz·O2·Pz): " + r.m1_liking_note +
+      (ev ? ` · DEAP 새 참가자 평가 MAE ${ev.mae}점 (중앙값 기준 ${ev.mae_median_baseline}점)` : ""));
+  }
   if (m.channel_note) notes.push(m.channel_note);
   $("#result-notes").hidden = !notes.length;
   $("#result-notes").innerHTML = notes.map((w) => `<li>${esc(w)}</li>`).join("");
@@ -975,6 +982,7 @@ function renderGrid(items, B) {
           <div class="bar" title="EEG 기반 추정 선호 확률"><span style="width:${(it.eeg_like_probability ?? 0) * 100}%"></span></div>
           <dl class="compare">
             <dt>4채널 예측 Liking</dt><dd>${it.posterior_liking == null ? "측정 불가" : it.posterior_liking.toFixed(2) + " / 9"}</dd>
+            <dt>m1 방식 예측</dt><dd>${it.m1_liking == null ? "측정 불가" : it.m1_liking.toFixed(2) + " / 9"}</dd>
             <dt>EEG 추정</dt><dd>${LABEL_KO[it.eeg_label]}${it.confidence !== null ? ` · 신뢰도 ${pct(it.confidence)}` : ""}</dd>
             <dt>설문 기대</dt><dd>${LABEL_KO[it.survey_label]}${it.survey_expected ? ` (${it.survey_expected})` : ""}</dd>
             <dt>본인 평정</dt><dd>${it.rating ?? "-"} / 9${it.seen_before === null ? "" : it.seen_before ? " · 본 적 있음" : " · 처음 봄"}</dd>
@@ -996,7 +1004,7 @@ function renderGrid(items, B) {
 function toCSV(items) {
   const cols = ["trial_index", "stimulus_id", "title", "category", "tone", "quality", "eeg_like_probability",
     "confidence", "eeg_label", "survey_expected", "survey_label", "rating", "rating_label", "seen_before", "agreement",
-    "rating_agreement", "posterior_liking"];
+    "rating_agreement", "posterior_liking", "m1_liking"];
   const cell = (v) => (v === null || v === undefined ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v);
   return "﻿" + [cols.join(","), ...items.map((it) => cols.map((c) => cell(it[c])).join(","))].join("\n");
 }

@@ -1,0 +1,22 @@
+{
+  "new_participant": {
+    "n": 1280,
+    "mae": 1.907,
+    "mae_median_baseline": 1.828,
+    "r2": -0.01,
+    "participant_mae_mean": 1.907,
+    "participant_mae_median_baseline": 1.828,
+    "participants_better_than_median": 8,
+    "participants": 32
+  },
+  "within_person": {
+    "n": 1280,
+    "mae": 1.914,
+    "mae_median_baseline": 1.832,
+    "r2": -0.069,
+    "participant_mae_mean": 1.914,
+    "participant_mae_median_baseline": 1.832,
+    "participants_better_than_median": 10,
+    "participants": 32
+  }
+}

@@ -84,7 +84,10 @@ def open_acquisition() -> Acquisition:
     try:
         if settings.source == "lsl" and not state.layout and os.environ.get("LAB_REQUIRE_LAYOUT") == "1":
             raise ValueError("시작 화면의 EEG 배선 설정에서 장비와 입력 위치를 먼저 지정하세요.")
-        if settings.source == "lsl" and state.layout:
+        if settings.source == "lsl" and state.layout and state.layout.uid.startswith("gusbamp:"):
+            from .eeg.gusbamp_source import GUSBampSource   # 배선 화면에서 고른 USB 직접 연결 g.USBamp
+            source = GUSBampSource(layout=state.layout)
+        elif settings.source == "lsl" and state.layout:
             from .eeg.lsl_source import LSLSource
             source = LSLSource(layout=state.layout)
         else:

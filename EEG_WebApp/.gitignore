@@ -6,3 +6,5 @@ data/
 evaluation/posterior/predictions.csv
 # 내려받은 후보 사진(최종 세트는 stimuli/images)
 stimuli/candidates/
+evaluation/m1_liking/predictions.csv
+evaluation/m1_liking/features.csv

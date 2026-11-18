@@ -17,7 +17,7 @@
 
 Windows에서 이 폴더의 `start_lab.cmd`를 실행하세요. 첫 실행은 Python 3.12와 패키지 설치용 인터넷이 필요합니다. 배선 설정은 `http://127.0.0.1:8766/static/wiring.html`에서 열립니다.
 
-1. 지텍 소프트웨어에서 EEG의 LSL 송출을 시작하고 웹앱에서 장비를 검색합니다. 장비 문서의 실제 입력 번호를 O1, Oz, O2, Pz에 연결해 입력 단위를 맞춥니다. REF·GND는 장비 문서에 따라 연결합니다.
+1. g.USBamp를 USB로 연결하고(MATLAB 등은 종료, 아래 "g.USBamp 직접 연결" 참고) 또는 지텍 소프트웨어에서 EEG의 LSL 송출을 시작하고 웹앱에서 장비를 검색합니다. 장비 문서의 실제 입력 번호를 O1, Oz, O2, Pz에 연결해 입력 단위를 맞춥니다. REF·GND는 장비 문서에 따라 연결합니다.
 2. 실장비 파일럿(사진 4장)을 선택하고 가명 ID와 참여 동의를 입력합니다. 기본 설정은 사전 설문을 이미 받은 상태이며, 참가자는 사진마다 회복 구간이 끝난 뒤 Liking 1–9점을 입력합니다. 현장 평정을 생략하려면 두 번째 체크를 해제하세요. 진행자용 사진 자료 화면에서는 본 측정에 쓰는 사진 32장과 ID를 점검할 수 있습니다.
 3. 장비 연결 후 파형과 채널 품질을 확인합니다. 카메라 사용에 동의한 경우 내장 캠을 켜고 얼굴·귀·양쪽 어깨가 보이게 맞춥니다. 진행자 모니터는 같은 브라우저의 보조 화면에 두세요.
 4. 휴식 기준선 후 각 사진마다 고정점 3초, 사진 4초, 회복 3초를 기록합니다. 파일럿 종료 후 모든 사진의 예측·프레임 수와 세션 폴더의 EEG·마커 파일을 확인한 뒤 별도 ID로 본 측정을 진행합니다.
@@ -35,6 +35,13 @@ Windows에서 이 폴더의 `start_lab.cmd`를 실행하세요. 첫 실행은 Py
 
 EEG Liking은 O1·Oz·O2·Pz의 고정점 대비 theta·alpha·beta 변화로 계산합니다. 기존 평가 파일에서 29명·1,160시행의 참가자별 MAE 평균은 새 영상 1.834점(개인 중앙값 1.738점), 새 참가자와 새 영상 1.841점(집단 중앙값 1.749점)입니다. 사진 실측에서의 성능은 별도 평가 대상입니다.
 
+**m1 방식 Liking**은 같은 4채널(O1·Oz·O2·Pz)에 연구 브랜치 research/m1-deap(34914d7)의 특징과 모델 구조를 그대로 옮긴 두 번째 예측입니다. 결과 화면과 측정 결과 화면에 4채널 모델 옆에 함께 표시되고, 서면 점수 비교도 두 모델 각각 계산합니다.
+
+- 특징: 2초 Hann·50% 겹침 Welch로 θ[4,8)·α[8,13)·β[13,30)·γ[30,45) Hz 파워(dB)를 구하고, 사진 구간의 절대 파워와 직전 3초 기준선 대비 변화를 함께 씁니다. 채널 4개 × 밴드 4개 × 2 = 32개입니다.
+- 모델: 표준화 → 단변량 F 점수로 16개 선택 → Ridge(alpha 10·100 중 내부 검증으로 선택). 연구 브랜치와 같습니다.
+- 바꾼 점: 연구 브랜치는 F3·F4·C3·C4와 영상 60초(20초×3)를 쓰지만, 여기서는 실험실 장비 채널과 사진 첫 4초 한 구간을 씁니다. DEAP와 실측 모두 4–45 Hz 대역통과를 먼저 겁니다. 실측에서는 필터 뒤 ±200 µV를 넘는 시행을 잡음으로 보고 계산하지 않습니다. DEAP 학습은 원본처럼 진폭으로 거르지 않으며, `--artifact-uv 200`을 주면 같은 기준으로 거른 뒤 학습합니다. 같은 사람 평가에는 시행이 10개 이상 남은 참가자만 넣습니다.
+- 학습·평가: `python tools/train_m1_liking.py --data ..\EEG_Test\dataset\data_preprocessed_matlab`. 연구 브랜치와 같은 두 평가(같은 사람의 새 영상, 새 참가자)를 하고 중앙값 기준과 비교한 뒤, 1,280시행 전체로 학습한 모델을 `backend/m1_liking.json`(숫자만 담은 JSON)에 저장합니다. 평가 결과는 `evaluation/m1_liking/`에 남습니다. 모델 파일이 없으면 이 예측만 "측정 불가"로 표시되고 나머지는 그대로 동작합니다.
+
 사진을 볼 때의 EEG로 선호를 추정하는 웹앱입니다. 시작 화면에서 두 가지 방식 중 하나를 고릅니다.
 
 - **장비로 측정**: 평소 취향 설문 → 장비 연결·신호 확인·1분 휴식 기준선 → 이미지 시청 중 EEG 측정 → 측정 후 추론 → 결과
@@ -51,6 +58,7 @@ Python 3.10 이상을 권장합니다(`py --version`으로 확인, 3.9도 동작
 py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+$env:EEG_SOURCE = "mock"   # 장비 없이 모의(합성) EEG로 해 볼 때만. 실측은 start_lab.cmd
 .\.venv\Scripts\python.exe -m uvicorn backend.main:app --port 8000
 ```
 
@@ -86,7 +94,7 @@ macOS/Linux는 `python3 -m venv .venv`, `.venv/bin/python -m pip install -r requ
 - 연결되기 전에는 기준선 측정 버튼이 잠겨 있고, 서버도 기록 시작과 기준선·시행 시작 마커를 거절합니다(HTTP 409).
 - 기준선 측정 중 2초 넘게 끊기면 그 기준선은 버리고 연결 화면으로 돌아갑니다. 사진 측정 중 끊기면 그 시행은 평가 없이 멈추고(`trial_aborted` 마커), "다시 연결"에 성공해야 같은 사진부터 이어집니다. 끊긴 채로는 "측정 끝내기"만 할 수 있습니다.
 - 다시 연결하면 같은 `eeg.csv`에 이어 기록하고 `device_reconnected` 마커를 남깁니다. 끊긴 구간은 무결성 점검에 누락으로 잡힙니다.
-- 모의 EEG(`EEG_SOURCE=mock`, 기본값)는 장비 없이도 항상 연결됩니다. 끊김 동작은 측정 중에 `POST /api/device/simulate-drop`으로 확인할 수 있습니다(모의 전용).
+- 기본값(`EEG_SOURCE=none`)에서는 장비를 고르지 않으면 연결되지 않습니다. 모의 EEG는 배선 화면의 "장비 없이 모의 EEG로 연습"을 누르거나 `EEG_SOURCE=mock`으로 켰을 때만 쓰이고, 그때 장비 화면에 "모의(합성) 신호" 경고가 뜹니다. 모의 EEG는 장비 없이도 항상 연결됩니다. 끊김 동작은 측정 중에 `POST /api/device/simulate-drop`으로 확인할 수 있습니다(모의 전용).
 
 사용 편의 기능
 - 평정은 키보드로도 됩니다: 숫자 `1`–`9`, `Y`/`N`, `Enter`.
@@ -221,6 +229,28 @@ cd ..\EEG_Test
 
 ## 실제 장비 연결
 
+### g.USBamp 직접 연결 (LSL·MATLAB 없이)
+
+웹앱이 g.tec의 공식 Python 라이브러리 [g.Pype](https://gpype.gtec.at/content/2_gpype_training/season3_gearing_up/s3e5_gusbamp.html)로 g.USBamp를 직접 엽니다(`backend/eeg/gusbamp_source.py`). 웹앱 안에서 g.Pype 실시간 파이프라인 `gp.GUSBamp → gp.ChannelSelector(신호 채널만) → gp.ChannelLabeler(전극 이름) → 웹앱 싱크`를 돌립니다. 장비에서는 배선 화면에서 고른 입력만 받고, 전극 이름은 g.Pype 권장대로 장비 바로 뒤에서 붙입니다. 측정 중 USB가 빠지는 등으로 g.Pype 파이프라인이 오류 상태가 되면 웹앱이 끊김으로 표시하고 재연결 화면을 띄웁니다. g.USBamp는 일반 시리얼 포트가 아니라서 g.tec 드라이버를 거쳐야 합니다.
+
+1. 실험실 노트북에 g.USBamp 드라이버와 **g.tec Device Service(GDS, g.NEEDaccess)**가 설치돼 실행 중이어야 합니다. 그다음 웹앱 가상환경(Python 3.10 이상)에 g.Pype를 설치합니다.
+   ```powershell
+   .\.venv\Scripts\python.exe -m pip install "gpype[devices]"
+   .\.venv\Scripts\python.exe -c "import gpype, gtec_gds; print(gpype.__version__)"
+   ```
+   g.Pype와 그 장비 모듈(`gtec_gds`)은 g.tec 비상업 라이선스(GNCL)입니다. 교육·연구 목적으로 g.tec 증폭기와 함께 쓰는 것만 허용되고, `gtec_gds`는 g.Pype를 통해서만 쓰게 되어 있어 웹앱도 g.Pype의 `gp.GUSBamp`로만 장비를 엽니다.
+2. MATLAB, g.Recorder처럼 장비를 여는 프로그램을 모두 닫습니다. 장비는 한 번에 한 프로그램만 열 수 있습니다.
+3. `start_lab.cmd` → **장비 검색** → `g.USBamp <시리얼>`을 고릅니다. 입력 16개(A1–D4)가 나오면, 실제로 전극을 꽂은 입력에 O1·Oz·O2·Pz를 적고 나머지는 비워 둡니다. 단위는 µV입니다.
+4. 웹앱이 장비를 이렇게 설정합니다.
+   - 샘플링 속도: `GUSBAMP_FS`, 기본 256 Hz. 128, 256, 512, 600, 1200 Hz 중에서 고를 수 있습니다.
+   - 장비 안 대역·노치 필터: 따로 켜지 않습니다. 분석이 DEAP 학습과 같은 4–45 Hz 필터를 겁니다(한국 전원 60 Hz는 이 대역 밖).
+   - 트리거·샘플 카운터: 끕니다. 마커는 웹앱이 같은 PC 시계로 찍습니다.
+   - REF·GND: 네 그룹(A–D)의 REF·GND를 장비 안에서 묶으므로, REF·GND 전극을 하나씩만 연결합니다.
+5. 시각: g.USBamp에는 PC와 공유하는 시계가 없습니다. 그래서 첫 블록이 도착한 시각을 기준으로 샘플 번호 ÷ fs로 시각을 매기고, 마커도 같은 PC 시계(`time.perf_counter`)로 찍습니다. `http://127.0.0.1:8766/api/device`의 `clock_lag_ms`가 측정 내내 수십 ms 안에 머무는지 확인하세요.
+6. 장비 없이 연습하려면 `$env:GDS_FAKE = "1"`을 설정한 뒤 `start_lab.cmd`를 실행합니다. 가짜 g.USBamp(`UB-FAKE.01`)가 검색되고, 배선부터 결과 화면까지 진행됩니다. g.Pype가 설치돼 있으면 g.Pype의 신호 발생기(`gp.Generator`)를 장비 자리에 넣어 실제와 똑같은 파이프라인으로 돌고, 없으면 내장 가짜 장비로 돕니다.
+
+첫 연결 때 확인할 것: 눈을 감으면 O1·Oz·O2에서 10 Hz 알파가 커지는지(채널·단위 확인), 측정 후 `integrity.json`에 샘플 누락이 없는지. 이 연결부는 g.Pype 4.2의 `gp.GUSBamp`로 작성했고, g.Pype 4.2를 설치한 환경에서 장비 자리에 신호 발생기를 넣어 파이프라인 전체(입력 선택, 채널 이름, 싱크, 실행 중 오류 → 끊김 표시)를 시험했습니다. 실제 g.USBamp로는 아직 시험하지 않았습니다. 실제 장비에서 오류가 나면 오류 문구를 그대로 알려 주세요.
+
 모의 소스 대신 쓰려면 서버를 켜기 전에 환경 변수를 설정합니다.
 
 **BrainFlow** (OpenBCI Cyton/Ganglion, Muse, BrainBit 등):
@@ -246,7 +276,9 @@ $env:LSL_STREAM_TYPE = "EEG"             # 또는 $env:LSL_STREAM_NAME = "스트
 
 | 환경 변수 | 기본값 | 의미 |
 |---|---|---|
-| `EEG_SOURCE` | `mock` | `mock` / `brainflow` / `lsl` |
+| `EEG_SOURCE` | `none` | `none`(장비 미선택: 연결 안 됨) / `mock` / `brainflow` / `lsl` / `gusbamp` |
+| `GUSBAMP_FS` / `GUSBAMP_SERIAL` | `256` / (첫 장비) | g.USBamp 직접 연결 샘플링 속도·장비 시리얼 |
+| `GDS_FAKE` | (빈 값) | `1`이면 가짜 g.USBamp로 연습 |
 | `FEATURE_CHANNELS` | `F3,Fz,F4,C3,Cz,C4` | 모델 특징에 쓰는 전두·중심 채널 |
 | `BASELINE_SECONDS` | `60` | ② 휴식 기준선 |
 | `FIXATION_SECONDS` / `STIMULUS_SECONDS` / `RECOVERY_SECONDS` | `3` / `4` / `3` | ③ 시행 타이밍 (분석에는 고정점·자극 각각 2초 이상 필요) |

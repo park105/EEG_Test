@@ -1,4 +1,6 @@
 """python -m unittest discover -s tests -v"""
+import os
+os.environ.setdefault("EEG_SOURCE", "mock")  # 테스트는 모의 EEG로 돈다(앱 기본값은 장비 미선택 none)
 import json
 import tempfile
 import time
@@ -232,6 +234,25 @@ class ExportAndDeapTests(unittest.TestCase):
                 self.assertTrue((settings.data_dir / sid / "events.csv").is_file())  # 모델 입력 형식도 같이 만든다
             finally:
                 settings.data_dir, demo.DEMO_DIR = old_data, old_demo
+
+    def test_no_device_chosen_means_no_signal(self):
+        """장비를 고르지 않았으면 모의 신호로 대신 연결하지 않는다."""
+        from fastapi.testclient import TestClient
+        from backend import main
+        old = settings.source
+        try:
+            settings.source = "none"
+            c = TestClient(main.app)
+            r = c.post("/api/device/connect")
+            self.assertEqual(r.status_code, 503)
+            self.assertIn("장비가 선택되지 않았어요", r.json()["detail"])
+            self.assertFalse(c.get("/api/device").json()["connected"])
+            c.post("/api/lab/rehearsal")                       # 연습을 직접 고르면 모의 EEG
+            dev = c.post("/api/device/connect").json()
+            self.assertTrue(dev["connected"] and dev["synthetic"])
+            c.post("/api/device/disconnect")
+        finally:
+            settings.source = old
 
     def test_device_gate_blocks_without_data(self):
         """연결 버튼만으로는 넘어가지 않는다: 실제 샘플이 들어와야 연결로 치고, 끊기면 시작 마커를 거절한다."""

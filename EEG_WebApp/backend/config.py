@@ -30,8 +30,10 @@ class Timing:
 
 @dataclass
 class Settings:
-    # mock | brainflow | lsl
-    source: str = _env("EEG_SOURCE", "mock")
+    # none | mock | brainflow | lsl | gusbamp
+    # 기본값 none: 장비를 고르지 않으면 연결되지 않는다. 모의(합성) EEG는 배선 화면의 연습 버튼이나
+    # EEG_SOURCE=mock으로 직접 골랐을 때만 쓴다(장비 없이 가짜 신호가 실측처럼 보이지 않게).
+    source: str = _env("EEG_SOURCE", "none")
     # 모델 특징에 쓰는 전두·중심 채널. 장비에 없는 채널은 자동으로 빠진다.
     feature_channels: list[str] = field(default_factory=lambda: _env_list(
         "FEATURE_CHANNELS", "F3,Fz,F4,C3,Cz,C4"))
@@ -49,6 +51,8 @@ class Settings:
     # LSL
     lsl_stream_type: str = _env("LSL_STREAM_TYPE", "EEG")
     lsl_stream_name: str = _env("LSL_STREAM_NAME", "")
+    # g.USBamp 직접 연결(g.Pype). 비우면 비어 있는 장비를 g.Pype가 고른다. 샘플링 속도는 GUSBAMP_FS(기본 256)
+    gusbamp_serial: str = _env("GUSBAMP_SERIAL", "")
     # 장비 출력 단위를 uV로 맞추는 배율 (V 출력이면 1000000)
     device_scale_to_uv: float = float(_env("DEVICE_SCALE_TO_UV", "1"))
 
