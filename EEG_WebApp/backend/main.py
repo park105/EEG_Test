@@ -565,6 +565,8 @@ async def ws(websocket: WebSocket):
 
 
 # ---------------- 정적 파일 ----------------
+from .offline import router as offline_router
+app.include_router(offline_router)
 app.mount("/stimuli", StaticFiles(directory=settings.stimuli_dir), name="stimuli")
 app.mount("/static", StaticFiles(directory=settings.frontend_dir), name="static")
 

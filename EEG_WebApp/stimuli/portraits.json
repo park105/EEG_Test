@@ -1,0 +1,261 @@
+{
+  "note": "User-provided Asset/figure files. Original filenames preserved in metadata.",
+  "stimuli": [
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_01.jpeg",
+      "original_file": "Male/Gemini_Generated_Image.jpeg",
+      "id": "male_01",
+      "category": "male",
+      "title": "Male 1"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_02.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (1).jpeg",
+      "id": "male_02",
+      "category": "male",
+      "title": "Male 2"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_03.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (2).jpeg",
+      "id": "male_03",
+      "category": "male",
+      "title": "Male 3"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_04.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (3).jpeg",
+      "id": "male_04",
+      "category": "male",
+      "title": "Male 4"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_05.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (4).jpeg",
+      "id": "male_05",
+      "category": "male",
+      "title": "Male 5"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_06.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (5).jpeg",
+      "id": "male_06",
+      "category": "male",
+      "title": "Male 6"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_07.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (6).jpeg",
+      "id": "male_07",
+      "category": "male",
+      "title": "Male 7"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_08.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (7).jpeg",
+      "id": "male_08",
+      "category": "male",
+      "title": "Male 8"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_09.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (8).jpeg",
+      "id": "male_09",
+      "category": "male",
+      "title": "Male 9"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_10.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (9).jpeg",
+      "id": "male_10",
+      "category": "male",
+      "title": "Male 10"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_11.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (10).jpeg",
+      "id": "male_11",
+      "category": "male",
+      "title": "Male 11"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_12.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (11).jpeg",
+      "id": "male_12",
+      "category": "male",
+      "title": "Male 12"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_13.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (12).jpeg",
+      "id": "male_13",
+      "category": "male",
+      "title": "Male 13"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_14.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (13).jpeg",
+      "id": "male_14",
+      "category": "male",
+      "title": "Male 14"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_15.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (14).jpeg",
+      "id": "male_15",
+      "category": "male",
+      "title": "Male 15"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/male_16.jpeg",
+      "original_file": "Male/Gemini_Generated_Image (15).jpeg",
+      "id": "male_16",
+      "category": "male",
+      "title": "Male 16"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_01.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (16).jpeg",
+      "id": "female_01",
+      "category": "female",
+      "title": "Female 1"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_02.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (17).jpeg",
+      "id": "female_02",
+      "category": "female",
+      "title": "Female 2"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_03.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (18).jpeg",
+      "id": "female_03",
+      "category": "female",
+      "title": "Female 3"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_04.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (19).jpeg",
+      "id": "female_04",
+      "category": "female",
+      "title": "Female 4"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_05.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (20).jpeg",
+      "id": "female_05",
+      "category": "female",
+      "title": "Female 5"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_06.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (21).jpeg",
+      "id": "female_06",
+      "category": "female",
+      "title": "Female 6"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_07.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (22).jpeg",
+      "id": "female_07",
+      "category": "female",
+      "title": "Female 7"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_08.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (23).jpeg",
+      "id": "female_08",
+      "category": "female",
+      "title": "Female 8"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_09.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (24).jpeg",
+      "id": "female_09",
+      "category": "female",
+      "title": "Female 9"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_10.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (25).jpeg",
+      "id": "female_10",
+      "category": "female",
+      "title": "Female 10"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_11.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (26).jpeg",
+      "id": "female_11",
+      "category": "female",
+      "title": "Female 11"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_12.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (27).jpeg",
+      "id": "female_12",
+      "category": "female",
+      "title": "Female 12"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_13.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (28).jpeg",
+      "id": "female_13",
+      "category": "female",
+      "title": "Female 13"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_14.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (29).jpeg",
+      "id": "female_14",
+      "category": "female",
+      "title": "Female 14"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_15.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (30).jpeg",
+      "id": "female_15",
+      "category": "female",
+      "title": "Female 15"
+    },
+    {
+      "type": "image",
+      "src": "/stimuli/portraits/female_16.jpeg",
+      "original_file": "Female/Gemini_Generated_Image (31).jpeg",
+      "id": "female_16",
+      "category": "female",
+      "title": "Female 16"
+    }
+  ]
+}
