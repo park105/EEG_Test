@@ -30,6 +30,24 @@ class Layout(BaseModel):
 
 
 def streams():
+    """배선 화면 장비 목록: USB로 직접 연결된 g.USBamp + 송출 중인 LSL 스트림. 하나라도 찾으면 돌려준다."""
+    found, errors = [], []
+    for name, search in (("g.USBamp", _gusbamp), ("LSL", _lsl)):
+        try:
+            found += search()
+        except Exception as exc:
+            errors.append(f"{name}: {exc}")
+    if not found and len(errors) == 2:
+        raise RuntimeError(" / ".join(errors))
+    return found
+
+
+def _gusbamp():
+    from .eeg.gusbamp_source import devices
+    return devices()
+
+
+def _lsl():
     import pylsl
     results = []
     for info in pylsl.resolve_streams(wait_time=1):

@@ -1,3 +1,5 @@
+import os
+os.environ.setdefault("EEG_SOURCE", "mock")  # 테스트는 모의 EEG로 돈다(앱 기본값은 장비 미선택 none)
 import tempfile
 import unittest
 from pathlib import Path

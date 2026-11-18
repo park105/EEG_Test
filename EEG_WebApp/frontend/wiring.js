@@ -49,7 +49,7 @@ function pick(){
 }
 el("scan").onclick=async()=>{
   el("scan").disabled=true; message("장비를 찾는 중…");selected=null;el("start").hidden=true;el("panel").hidden=true;el("sources").replaceChildren();
-  try{streams=await request("/api/lab/streams");for(const s of streams)el("sources").add(new Option(s.name+" / "+s.host+" / "+s.fs+" Hz",s.uid));pick();if(!streams.length)message("송출 중인 LSL 장비가 없습니다. 제조사 프로그램의 LSL 출력과 네트워크를 확인하세요.");}
+  try{streams=await request("/api/lab/streams");for(const s of streams)el("sources").add(new Option(s.name+" / "+s.host+" / "+s.fs+" Hz",s.uid));pick();if(!streams.length)message("연결된 g.USBamp나 송출 중인 LSL 장비가 없습니다. USB·전원, 또는 제조사 프로그램의 LSL 출력을 확인하세요.");}
   catch(e){message(e.message);}finally{el("scan").disabled=false;}
 };
 el("sources").onchange=pick;

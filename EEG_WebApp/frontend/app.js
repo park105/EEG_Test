@@ -314,6 +314,7 @@ function setupDevice() {
     $("#btn-connect").disabled = true;
     S.connecting = true;
     $("#device-info").textContent = "연결 중… 장비에서 데이터가 들어오는지 확인하고 있어요.";
+    $("#mock-warning").hidden = true;
     try {
       const dev = await api(S.dev.connectedOnce ? "/api/device/reconnect" : "/api/device/connect", {});
       await api(`/api/sessions/${S.session}/recording/start`, {});
@@ -365,6 +366,7 @@ function afterConnected(dev, fresh) {
   $("#btn-connect").disabled = true;
   $("#btn-connect").textContent = "연결됨";
   $("#device-info").textContent = `${dev.kind} · ${dev.channels.length}채널 · ${dev.fs} Hz` + (dev.synthetic ? " · 합성 신호" : "") + (fresh ? "" : " · 기록 이어서 진행 중");
+  $("#mock-warning").hidden = !(dev.synthetic || dev.kind === "mock");
   $("#scope-empty").hidden = true;
   openSocket();
   updateGate();
