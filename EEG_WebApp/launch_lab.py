@@ -21,7 +21,7 @@ if __name__ == "__main__":
     try:
         with urlopen("http://127.0.0.1:8766/openapi.json", timeout=1) as response:
             schema = json.load(response)
-            if "/api/field/sessions" in schema.get("paths", {}) and "/api/offline" not in schema.get("paths", {}):
+            if "/api/field/sessions" in schema.get("paths", {}) and "/api/safety/2026-11-19" not in schema.get("paths", {}):
                 raise SystemExit("먼저 기존 실측 서버 창을 닫고 start_lab.cmd를 다시 실행하세요.")
             if "/api/field/sessions" in schema.get("paths", {}):
                 webbrowser.open("http://127.0.0.1:8766/")

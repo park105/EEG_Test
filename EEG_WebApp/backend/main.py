@@ -181,7 +181,7 @@ def _reopen() -> dict:
     acq = open_acquisition()
     state.acquisition = acq
     if session and session.recording:
-        acq.add_sink(session.write_samples)
+        acq.add_sink(session.write_samples, session.record_health)
         session.add_marker(acq.source.now(), "device_reconnected")
     return source_info()
 
@@ -267,7 +267,7 @@ def start_recording(session_id: str):
     session.meta["source"] = src.info()
     fresh = not session.recording
     session.start_recording(src.channels)
-    state.acquisition.add_sink(session.write_samples)
+    state.acquisition.add_sink(session.write_samples, session.record_health)
     if fresh:
         session.add_marker(src.now(), "recording_start")
     return {"recording": True}
@@ -535,7 +535,7 @@ async def ws(websocket: WebSocket):
                     step = max(1, int(src.fs // 50))  # 화면용 약 50 Hz로 줄임
                     disp = x[::step] - np.median(x, axis=0)
                     await send({"type": "signal", "channels": src.channels, "streaming": acq.streaming(),
-                                               "fs": src.fs / step, "data": np.round(disp.T, 1).tolist()})
+                                               "fs": src.fs / step, "data": np.where(np.isfinite(disp.T), np.round(disp.T, 1), None).tolist()})
                 if tick % 4 == 0:
                     t2, x2 = acq.buffer.last(int(2 * src.fs))
                     live = acq.streaming()
@@ -570,6 +570,10 @@ async def ws(websocket: WebSocket):
 # ---------------- 정적 파일 ----------------
 from .offline import router as offline_router
 app.include_router(offline_router)
+
+@app.get("/api/safety/2026-11-19")
+def safety_revision():
+    return {"revision": "2026-11-19", "gusbamp_predictions": "blocked_pending_hardware_timing"}
 app.mount("/stimuli", StaticFiles(directory=settings.stimuli_dir), name="stimuli")
 app.mount("/static", StaticFiles(directory=settings.frontend_dir), name="static")
 

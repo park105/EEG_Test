@@ -4,6 +4,6 @@ ch.onmessage=({data:m})=>{
 if(m.camera)get("cam").textContent=m.camera;
 if(m.phase)get("phase").textContent=(m.photo||"")+" · "+m.phase;
 if(m.type==="quality"){last=Date.now();get("signal").textContent=m.error||(m.streaming?m.channels.map(c=>c.channel+" "+c.status).join(" · "):"신호 대기");}
-if(m.type==="signal"){const box=get("traces");box.replaceChildren();m.channels.forEach((name,i)=>{const row=document.createElement("div"),canvas=document.createElement("canvas");canvas.width=520;canvas.height=45;row.append(name+" ",canvas);box.append(row);const ctx=canvas.getContext("2d"),v=m.data[i];ctx.strokeStyle="#287765";ctx.beginPath();v.forEach((y,j)=>ctx.lineTo(520*j/v.length,22-Math.max(-21,Math.min(21,y/3))));ctx.stroke();});}};
+if(m.type==="signal"){const box=get("traces");box.replaceChildren();m.channels.forEach((name,i)=>{const row=document.createElement("div"),canvas=document.createElement("canvas");canvas.width=520;canvas.height=45;row.append(name+" ",canvas);box.append(row);const ctx=canvas.getContext("2d"),v=m.data[i];ctx.strokeStyle="#287765";ctx.beginPath();let pen=false;v.forEach((y,j)=>{if(!Number.isFinite(y)){pen=false;return;}const x=520*j/v.length,z=22-Math.max(-21,Math.min(21,y/3));pen?ctx.lineTo(x,z):ctx.moveTo(x,z);pen=true;});ctx.stroke();});}};
 setInterval(()=>{if(last&&Date.now()-last>3500)get("signal").textContent="측정 창의 EEG 갱신 중단";},1000);
 </script></html>

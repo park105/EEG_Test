@@ -222,9 +222,8 @@ def prepare(session_dir: Path, *, fs: float | None, unit: str, rating_scale: str
     if info["fs_est"] and abs(info["fs_est"] - fs) / fs > 0.05:
         warnings.append(f"입력한 샘플링 레이트 {fs:g} Hz가 시각 열로 계산한 {info['fs_est']:g} Hz와 달라요.")
     x = df[channels].to_numpy(float) * UNIT_TO_UV[unit]
-    if np.isnan(x).any():
-        x = pd.DataFrame(x).interpolate(limit_direction="both").to_numpy()
-        warnings.append("비어 있는 EEG 값은 앞뒤 값으로 채웠어요.")
+    if not np.isfinite(x).all():
+        raise UploadError("EEG에 결측·무한값이 있습니다. 원자료의 해당 구간을 확인하세요.")
     eeg = pd.DataFrame(x, columns=channels)
     eeg.insert(0, "timestamp_s", t)
     eeg.to_csv(session_dir / "eeg.csv", index=False, float_format="%.6f")

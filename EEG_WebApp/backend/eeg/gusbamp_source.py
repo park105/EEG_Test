@@ -69,7 +69,7 @@ def default_fs() -> int:
 
 def _entry(serial: str, in_use: bool = False) -> dict:
     name = "g.USBamp (USB, 비어 있는 장비 자동 선택)" if serial == AUTO else f"g.USBamp {serial}"
-    return dict(uid=PREFIX + serial, name=name + (" (다른 프로그램이 사용 중)" if in_use else ""),
+    return dict(uid=PREFIX + serial, synthetic=fake(), name=("[연습용 가짜] " if fake() else "") + name + (" (다른 프로그램이 사용 중)" if in_use else ""),
                 host="USB 직접", fs=default_fs(), in_use=in_use, wires=[dict(w) for w in WIRES])
 
 
@@ -129,6 +129,7 @@ class GUSBampSource(EEGSource):
     def __init__(self, serial: str = "", fs: float | None = None, layout=None,
                  channel_names: list[str] | None = None) -> None:
         super().__init__()
+        self.synthetic = fake()
         if layout is not None:
             serial = layout.uid[len(PREFIX):]
             if len(layout.wires) != N_CHANNELS:
@@ -149,15 +150,21 @@ class GUSBampSource(EEGSource):
         self.t0: float | None = None
         self.count = 0
         self.lag = 0.0
+        self.max_lag = 0.0
+        self.timing_fault = False
 
     # ---- 정보 ----
     def info(self) -> dict:
         meta = super().info()
-        driver = "g.Pype" if self.pipeline is not None else "fake"
-        if fake():
+        driver = "g.Pype" if self.pipeline is not None else ("fake" if self.synthetic else "g.Pype (대기)")
+        if self.synthetic:
             driver += " (가짜 장비)"
         meta.update(serial=self.serial or None, inputs=[WIRES[i]["label"] for i in self.inputs],
                     clock_lag_ms=round(self.lag * 1000, 1),
+                    max_clock_lag_ms=round(self.max_lag * 1000, 1),
+                    transport_timing_ok=not self.timing_fault,
+                    timing_error="수신 시각 편차 250ms 초과 — 시간 정렬 확인 필요" if self.timing_fault else None,
+                    hardware_sample_loss_verified=False,
                     device_clock="샘플 번호 ÷ fs (첫 프레임 도착 기준)", driver=driver)
         if self.layout is not None:
             meta.update(stream_name=f"g.USBamp {self.serial or ''}".strip(),
@@ -268,6 +275,8 @@ class GUSBampSource(EEGSource):
             stamps.append(self.t0 + (self.count + np.arange(n)) / self.fs)
             self.count += n
             self.lag = arrived - (self.t0 + self.count / self.fs)
+            self.max_lag = max(self.max_lag, abs(self.lag))
+            self.timing_fault = self.timing_fault or abs(self.lag) > 0.250
             frames.append(frame)
         if not frames:
             return np.zeros(0), np.zeros((0, len(self.channels)))

@@ -12,6 +12,7 @@ import numpy as np
 from scipy.signal import butter, sosfiltfilt, welch
 
 from .config import settings
+from .quality import signal_issue
 
 BANDS = {"theta": (4, 8), "alpha": (8, 13), "beta": (13, 30)}
 
@@ -75,6 +76,9 @@ def trial_features(baseline: np.ndarray, stimulus: np.ndarray, fs: float,
       feature_caa            : 중심 알파 비대칭 변화 (C4/C3)
     """
     pre, get = AnalEEG(fs), GetFeature()
+    issue = signal_issue(baseline) or signal_issue(stimulus)
+    if issue:
+        return {}, issue
     status = next((r for r in (pre.quality(_detrend(baseline)), pre.quality(_detrend(stimulus))) if r != "ok"), "ok")
     if status != "ok":
         return {}, status
@@ -86,4 +90,6 @@ def trial_features(baseline: np.ndarray, stimulus: np.ndarray, fs: float,
             asym_s = np.log(s[f"{right}_alpha"] + 1e-12) - np.log(s[f"{left}_alpha"] + 1e-12)
             asym_b = np.log(b[f"{right}_alpha"] + 1e-12) - np.log(b[f"{left}_alpha"] + 1e-12)
             feats[f"feature_{name}"] = float(asym_s - asym_b)
+    if not all(np.isfinite(v) for v in feats.values()):
+        return {}, "nonfinite_features"
     return feats, "ok"

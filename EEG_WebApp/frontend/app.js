@@ -414,7 +414,7 @@ function renderQuality(msg) {
     ["good", "fair", "bad"].map((k) => `<span class="qchip ${k}">${icon[k]} ${QUALITY_KO[k]} ${counts[k]}</span>`).join("");
   $("#quality").innerHTML = msg.channels.map((c) => `<div class="qcell ${c.status}" title="${esc(c.message)}">
       <b>${esc(c.channel)}</b> <span class="q ${c.status}">${QUALITY_KO[c.status]}</span>
-      <div class="muted">${c.std_uv !== undefined ? `σ ${c.std_uv} µV` : esc(c.message)}</div></div>`).join("");
+      <div class="muted">${c.std_uv != null ? `σ ${c.std_uv} µV · ${esc(c.message)}` : esc(c.message)}</div></div>`).join("");
 }
 
 function drawScope(msg) {
@@ -431,10 +431,13 @@ function drawScope(msg) {
     ctx.fillStyle = css.getPropertyValue("--muted"); ctx.fillText(msg.channels[i], 6 * dpr, y0 + 4 * dpr);
     ctx.strokeStyle = css.getPropertyValue(bad.has(msg.channels[i]) ? "--bad" : "--series-1");
     ctx.lineWidth = 1.2 * dpr; ctx.beginPath();
+    let penDown = false;
     ch.forEach((v, k) => {
+      if (!Number.isFinite(v)) { penDown = false; return; }
       const x = 44 * dpr + (k / ch.length) * (w - 50 * dpr);
       const y = y0 - Math.max(-60, Math.min(60, v)) * scale;
-      k ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      penDown ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      penDown = true;
     });
     ctx.stroke();
   });
@@ -908,8 +911,8 @@ function renderResults(r) {
   if (m.auc_vs_rating !== undefined && m.auc_vs_rating !== null)
     stats.push(["본인 평정 대비 AUC", m.auc_vs_rating, "우연 수준 0.5"]);
   const ig = r.integrity && r.integrity.eeg;
-  if (ig) stats.push(["데이터 점검", `누락 ${ig.lost_percent}%`,
-    r.integrity.markers && r.integrity.markers.status === "ok" ? `마커 흔들림 ${r.integrity.markers.spread_ms_sd}ms` : ""]);
+  if (ig) stats.push(["데이터 점검", ig.lost_percent == null ? "누락 여부 미검증" : `시각 기준 누락 추정 ${ig.lost_percent}%`,
+    ig.problem || (r.integrity.markers && r.integrity.markers.status === "ok" ? `마커 흔들림 ${r.integrity.markers.spread_ms_sd}ms` : "")]);
   $("#summary").innerHTML = stats.map(([k, v, s]) =>
     `<div class="stat"><div class="k">${k}</div><div class="v">${esc(v)}</div>${s ? `<div class="s">${esc(s)}</div>` : ""}</div>`).join("");
 

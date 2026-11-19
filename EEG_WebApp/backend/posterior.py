@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 
 from .features import GetFeature
+from .quality import signal_issue
 
 CHANNELS = ["O1", "Oz", "O2", "Pz"]
 COLUMNS = [f"feature_{c}_{b}_db" for c in CHANNELS for b in ("theta", "alpha", "beta")]
@@ -17,6 +18,8 @@ def extract(base, stim, fs):
         return None
     base, stim = base[-nb:], stim[:ns]
     for window in (base, stim):
+        if signal_issue(window):
+            return None
         if not np.isfinite(window).all() or np.any(np.ptp(window, axis=0) == 0):
             return None
         if np.max(np.abs(window - window.mean(axis=0))) > 150:
@@ -48,5 +51,5 @@ def predict_session(eeg, trials, fs, integrity):
         vector = extract(values[a:b], values[b:c], fs)
         if vector is not None:
             scores[trial.trial_index] = round(float(score(vector, model)), 3)
-    return scores, f"유효 시행 {len(scores)}/{len(trials)} · 직전 3초 대비 시청 첫 4초"
+    return scores, f"유효 시행 {len(scores)}/{len(trials)} · 직전 3초 대비 시청 첫 4초 · 추가 대역통과 필터 없음 (12특징 Ridge)"
 

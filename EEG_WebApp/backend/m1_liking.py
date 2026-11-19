@@ -17,6 +17,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+from .quality import signal_issue
 from scipy.signal import butter, sosfiltfilt, welch
 
 CHANNELS = ["O1", "Oz", "O2", "Pz"]
@@ -54,6 +55,8 @@ def features(base: np.ndarray, stim: np.ndarray, fs: float, filtered: bool = Fal
     artifact_uv=None이면 진폭으로 거르지 않는다(DEAP 학습은 원본 m1-deap처럼 전 시행을 쓴다)."""
     nb, ns = int(round(BASELINE_S * fs)), int(round(STIMULUS_S * fs))
     if len(base) < nb or len(stim) < ns:
+        return None
+    if signal_issue(base[-nb:]) or signal_issue(stim[:ns]):
         return None
     window = np.concatenate([base[-nb:], stim[:ns]])
     if not np.isfinite(window).all() or np.any(np.ptp(window, axis=0) == 0):
@@ -98,11 +101,15 @@ def predict_session(eeg, trials, fs: float, integrity: dict) -> tuple[dict, str]
     if not np.isfinite(values).all():
         return {}, "EEG에 비어 있는 값이 있습니다."
     # 시행마다 7초만 자르면 필터 가장자리 왜곡이 생기므로 전체 기록을 한 번에 거른 뒤 자른다(학습도 같은 방식)
+    raw_values = values
     values = bandpass(values - values.mean(axis=0), fs)
     times = eeg["timestamp_s"].to_numpy()
     scores, rejected = {}, 0
     for tr in trials.itertuples():
         a, b, c = np.searchsorted(times, [tr.fixation_onset, tr.stimulus_onset, tr.stimulus_offset])
+        if signal_issue(raw_values[a:b]) or signal_issue(raw_values[b:c]):
+            rejected += 1
+            continue
         vec = features(values[a:b], values[b:c], fs, filtered=True)
         if vec is None:
             rejected += 1

@@ -58,7 +58,7 @@ el("allunit").onchange=()=>{for(const f of fields)f.unit.value=el("allunit").val
 el("save").onclick=()=>{try{const ws=wires();if(!ws.some(w=>w.name))throw new Error("기록할 전극을 지정하세요.");localStorage.setItem("brainficial.wiring",JSON.stringify(ws));message("이 브라우저에 배선표를 저장했습니다.");}catch(e){message(e.message);}};
 el("restore").onclick=()=>{try{const ws=JSON.parse(localStorage.getItem("brainficial.wiring"));if(!ws||ws.length!==fields.length)throw new Error("같은 입력 수의 저장된 배선표가 없습니다.");ws.forEach((w,i)=>{fields[i].name.value=w.name;fields[i].unit.value=w.kind==="skip"?"":w.unit;});changed();message("불러온 위치와 단위가 현재 실제 배선과 맞는지 확인하세요.");}catch(e){message(e.message);}};
 el("connect").onclick=async()=>{if(!selected||!el("confirm").checked)return message("실제 장비와 배선 확인 체크가 필요합니다.");el("connect").disabled=true;
-try{const data=await request("/api/lab/layout",{uid:selected.uid,wires:wires()});message("신호 수신 확인 · "+data.fs+" Hz · "+data.channels.join(", "));el("start").hidden=false;}
+try{const data=await request("/api/lab/layout",{uid:selected.uid,wires:wires()});message((data.synthetic?"[연습용 가짜 EEG] ":"")+"신호 수신 확인 · "+data.fs+" Hz · "+data.channels.join(", ")+(data.kind==="gusbamp"?" · 장비 샘플 연속성 미검증: 원본 수집 가능, 자동 예측 보류":""));el("start").hidden=false;}
 catch(e){message(e.message);}finally{el("connect").disabled=!selected;}};
 el("mock").onclick=async()=>{try{await request("/api/lab/rehearsal",{});location.href="/?quick=1";}catch(e){message(e.message);}};
 

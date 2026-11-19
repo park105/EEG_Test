@@ -51,6 +51,10 @@ def build_events(markers: pd.DataFrame, ratings: pd.DataFrame) -> pd.DataFrame:
 
 
 def check_eeg(t: np.ndarray, fs: float) -> dict:
+    if len(t) < 2 or not np.isfinite(t).all() or not np.isfinite(fs) or fs <= 0:
+        return {"samples": int(len(t)), "duration_s": None, "fs": fs,
+                "lost_samples_est": None, "lost_percent": None, "nonincreasing": None,
+                "uniform_for_loader": False, "problem": "시각 결측 또는 표본 부족"}
     dt = np.diff(t)
     expected = 1 / fs
     duration = float(t[-1] - t[0]) if len(t) > 1 else 0.0
@@ -93,7 +97,7 @@ def export_session(session_dir: Path, fs: float, channels: list[str], unit: str 
     info = check_eeg(t, fs)
     eeg_file = "eeg.csv"
     if not info["uniform_for_loader"]:
-        if info["lost_samples_est"] == 0 and info["nonincreasing"] == 0:
+        if len(t) >= 2 and np.isfinite(t).all() and info["lost_samples_est"] == 0 and info["nonincreasing"] == 0:
             # 누락은 없고 시각만 흔들림(BrainFlow 청크 시각 등) → 선형 적합으로 균일하게 다시 매김
             i = np.arange(len(t))
             slope, intercept = np.polyfit(i, t, 1)
@@ -106,6 +110,28 @@ def export_session(session_dir: Path, fs: float, channels: list[str], unit: str 
         else:
             eeg_file = None
             info["problem"] = "샘플 누락 또는 시각 역전이 있어 모델 입력으로 바로 쓸 수 없습니다."
+    if not np.isfinite(eeg[channels].to_numpy(float)).all():
+        eeg_file = None
+        info["problem"] = "EEG 결측·무한값 발견 — 보간이나 0 대입 없이 전체 예측 중단"
+    meta = json.loads((session_dir / "session.json").read_text(encoding="utf-8"))
+    source = meta.get("source", {})
+    health = meta.get("recording_health", {})
+    if source.get("kind") == "gusbamp":
+        info["timestamp_gap_samples_est"] = info["lost_samples_est"]
+        info["lost_samples_est"] = None
+        info["lost_percent"] = None
+        info["hardware_sample_loss_verified"] = False
+        info["clock_note"] = "수신 표본 수 기반 시각: 하드웨어 누락 수와 최초 전송 지연은 확인 불가"
+        info["recording_health"] = health
+        # Sample-index timestamps cannot establish physical sample continuity.
+        # Until hardware counters/anchors are validated, keep raw data but fail closed.
+        eeg_file = None
+        info["problem"] = "g.USBamp 하드웨어 시각·표본 연속성 미검증 — 원본 저장 유지, 자동 예측 보류"
+        if health.get("timing_fault"):
+            info["problem"] = "g.USBamp 수신 지연/오류 감지 — 원본 저장 유지, 모든 예측 중단"
+    elif health.get("timing_fault"):
+        eeg_file = None
+        info["problem"] = "기록 중 수집 오류 발생 — 모든 예측 중단"
     result = {
         "eeg": info, "markers": marker_latency(markers),
         "trials_complete": int(len(events)), "trials_rated": int(events["rating"].notna().sum()),

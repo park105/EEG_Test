@@ -94,6 +94,21 @@ class Session:
             self.meta["status"] = "recording"
             self.save_meta()
 
+    def record_health(self, info: dict) -> None:
+        """Persist faults across transient recovery and reconnects."""
+        with self._lock:
+            previous = self.meta.get("recording_health", {})
+            health = dict(previous)
+            health["timing_fault"] = bool(previous.get("timing_fault") or info.get("acquisition_error") or info.get("transport_timing_ok") is False)
+            health["max_clock_lag_ms"] = max(previous.get("max_clock_lag_ms", 0), abs(info.get("max_clock_lag_ms", 0)))
+            if info.get("acquisition_error"):
+                health["last_error"] = info["acquisition_error"]
+            if info.get("synthetic"):
+                self.meta["source"]["synthetic"] = True
+            if health != previous:
+                self.meta["recording_health"] = health
+                self.save_meta()
+
     def write_samples(self, t: np.ndarray, x: np.ndarray) -> None:
         with self._lock:
             if not self.recording:

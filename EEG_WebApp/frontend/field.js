@@ -45,7 +45,8 @@ async function init(){
       el("live-rows").append(row);
     }
   }
-  el("status").textContent=(result.synthetic?"모의 EEG · ":"")+"참가자 "+result.participant_id+" · "+id;
+  el("status").textContent=(result.synthetic?"모의 EEG · ":"")+"참가자 "+result.participant_id+" · "+id+
+    (result.integrity?.eeg?.problem ? " · 예측 보류: "+result.integrity.eeg.problem : "");
   el("analysis").hidden=el("survey").hidden=false;
   result.items.sort((a,b)=>a.trial_index-b.trial_index);
   el("summary").textContent=`측정 ${result.n_trials}회 · 4채널 예측 ${result.items.filter(r=>Number.isFinite(r.posterior_liking)).length}회 · ${result.posterior_liking_note||""}`+

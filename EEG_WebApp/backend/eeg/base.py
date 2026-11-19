@@ -70,6 +70,7 @@ class Acquisition:
         self.buffer: RingBuffer | None = None
         self.buffer_seconds = buffer_seconds
         self.sinks: list[Callable[[np.ndarray, np.ndarray], None]] = []
+        self.health_sinks = {}
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self.error: str | None = None
@@ -89,9 +90,11 @@ class Acquisition:
                 t, x = self.source.read()
             except Exception as exc:  # 장비 끊김 등은 화면에 보여 준다
                 self.error = f"{type(exc).__name__}: {exc}"
+                self._report_health()
                 time.sleep(0.5)
                 continue
-            self.error = None
+            self.error = self.source.info().get("timing_error")
+            self._report_health()
             if len(t):
                 self._last_data = time.monotonic()
                 self.buffer.extend(t, x)
@@ -116,13 +119,23 @@ class Acquisition:
             time.sleep(0.05)
         return self._last_data is not None
 
-    def add_sink(self, sink) -> None:
+    def _report_health(self):
+        info = {**self.source.info(), "acquisition_error": self.error}
         with self.sinks_lock:
+            for callback in self.health_sinks.values():
+                callback(info)
+
+    def add_sink(self, sink, health=None) -> None:
+        with self.sinks_lock:
+            if health:
+                self.health_sinks[sink] = health
+                health({**self.source.info(), "acquisition_error": self.error})
             if sink not in self.sinks:  # 다시 연결·이어하기로 두 번 불려도 한 번만 기록
                 self.sinks.append(sink)
 
     def remove_sink(self, sink) -> None:
         with self.sinks_lock:
+            self.health_sinks.pop(sink, None)
             if sink in self.sinks:
                 self.sinks.remove(sink)
 

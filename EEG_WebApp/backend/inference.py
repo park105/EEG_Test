@@ -15,6 +15,7 @@ from . import field_analysis
 from . import features as feat
 from .export import export_session, build_trials
 from .model import FrontalAsymmetryBaseline, PersonalLogistic, feature_columns, out_of_fold_personal
+from .quality import signal_issue
 
 LIKE_MIN, DISLIKE_MAX = 6, 4          # 1–9 평정: 6 이상 좋아함, 4 이하 싫어함, 5 중립
 UNCERTAIN_CONFIDENCE = 0.15           # 이보다 낮으면 EEG 판단 보류
@@ -46,6 +47,9 @@ def resting_summary(eeg: pd.DataFrame, markers: pd.DataFrame, fs: float, channel
     x = eeg[channels].to_numpy(float)[(t >= times["baseline_start"]) & (t < times["baseline_end"])]
     if len(x) < 2 * fs:
         return {"status": "too_short"}
+    issue = signal_issue(x)
+    if issue:
+        return {"status": issue}
     x = feat.AnalEEG(fs).transform(x - x.mean(axis=0))
     psd = feat.GetFeature().psd(x, fs, channels)
     return {"status": "ok", "seconds": round(len(x) / fs, 1),
@@ -94,20 +98,27 @@ def run(session_dir: Path, stimuli: list[dict], survey_items: list[dict], featur
         raise ValueError("완료된 시행이 없습니다.")
     df = df.merge(ratings[["trial_index", "liking", "seen_before"]], on="trial_index", how="left")
 
+    integrity = export_session(session_dir, fs, list(meta["source"]["channels"]), "uV")
+    if not integrity["model_input"]:
+        df["quality"] = "integrity_failed"
     usable = df[df["quality"] == "ok"].copy()
     cols = feature_columns(usable)
-    usable[cols] = usable[cols].fillna(0.0)
+    finite = np.isfinite(usable[cols].to_numpy(float)).all(axis=1)
+    df.loc[usable.index[~finite], "quality"] = "nonfinite_features"
+    usable = usable.loc[finite]
     y_label = usable["liking"].map(lambda r: _label(r) if pd.notna(r) else "unknown")
     labeled = usable[y_label.isin(["like", "dislike"])]
     y = (y_label[labeled.index] == "like").astype(int).to_numpy()
 
     proba = pd.Series(np.nan, index=usable.index)
     eval_info: dict = {}
-    integrity = export_session(session_dir, fs, list(meta["source"]["channels"]), "uV")
     liking_scores, liking_note = posterior.predict_session(eeg, trials, fs, integrity)
     m1_scores, m1_note = m1_liking.predict_session(eeg, trials, fs, integrity)
     deap, deap_note = deap_model.apply(session_dir, integrity["model_input"])
-    if deap is not None:
+    if not integrity["model_input"]:
+        model_name, model_desc = "blocked", "무결성 검사 실패 — 모든 EEG 예측 중단"
+        eval_info = {"note": integrity["eeg"].get("problem", model_desc)}
+    elif deap is not None:
         model_name, model_desc = "deap_ensemble", "DEAP 사전학습 앙상블(EEG_Test deap_ml)"
         trial_ids = df["trial_index"].map(lambda i: f"T{int(i):03d}")
         proba = pd.Series([deap["proba"].get(tid, np.nan) for tid in trial_ids], index=df.index)
@@ -192,7 +203,7 @@ def run(session_dir: Path, stimuli: list[dict], survey_items: list[dict], featur
     result = {
         "session_id": meta["session_id"], "participant_id": meta["participant_id"],
         "camera_associations": field_analysis.associations(items),
-        "synthetic": bool(meta["source"].get("synthetic")), "source": meta["source"]["kind"],
+        "synthetic": bool(meta["source"].get("synthetic")) or "fake" in meta["source"].get("driver", "").lower() or "가짜" in meta["source"].get("driver", ""), "source": meta["source"]["kind"],
         "mode": meta.get("mode", "device"), "upload_warnings": meta.get("upload_warnings", []),
         "has_survey": bool(answers),
         "posterior_liking_note": liking_note,
@@ -203,10 +214,11 @@ def run(session_dir: Path, stimuli: list[dict], survey_items: list[dict], featur
                   "n_features": len(cols), "feature_backend": feat.BACKEND, **eval_info},
         "n_trials": int(len(df)), "n_usable": int(len(usable)),
         "quality_counts": df["quality"].value_counts().to_dict(),
-        "agreement_counts": counts, "rating_agreement_counts": rating_counts, "resting": resting_summary(eeg, markers, fs, channels),
+        "agreement_counts": counts, "rating_agreement_counts": rating_counts,
+        "resting": resting_summary(eeg, markers, fs, channels) if integrity["model_input"] else {"status": "integrity_failed"},
         "integrity": {k: integrity[k] for k in ("eeg", "markers", "trials_complete", "trials_rated")},
         "items": sorted(items, key=lambda d: -(d["eeg_like_probability"] or 0)),
     }
     df.to_csv(session_dir / "features.csv", index=False)
-    (session_dir / "results.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    (session_dir / "results.json").write_text(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     return result
