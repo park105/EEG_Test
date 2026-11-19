@@ -9,4 +9,4 @@ httpx>=0.27
 # Real devices only (install one):
 # brainflow>=5.12   -> EEG_SOURCE=brainflow
 # pylsl>=1.16       -> EEG_SOURCE=lsl
-# gpype[devices]>=4.2 (+ g.tec Device Service) -> g.USBamp 직접 연결
+# gpype[devices]>=4.2 (+ g.tec Device Service) -> direct g.USBamp connection
